@@ -1,0 +1,126 @@
+import type { LocationSnapshot } from './types.ts';
+
+export const mockLocations: LocationSnapshot[] = [
+  {
+    id: 'sf-ca',
+    name: 'San Francisco',
+    region: 'California',
+    country: 'United States',
+    latitude: 37.7749,
+    longitude: -122.4194,
+    timezone: 'America/Los_Angeles',
+    summary: 'Hayes Valley microclimate with light marine layer.',
+    vibe: 'Coastal glow',
+    heroTemperature: 72,
+    heroFeelsLike: 70,
+    condition: 'Clear with an ocean breeze',
+    tags: ['UV 3 • mild', 'Pollen low', 'Marine layer lifts 2p'],
+    metrics: [
+      { label: 'Humidity', value: '62%', detail: 'Comfortable band' },
+      { label: 'Wind', value: '7 mph', detail: 'Breezy from the NW' },
+      { label: 'Visibility', value: '9 mi', detail: 'Coastal haze lifting' },
+    ],
+    planning: [
+      {
+        title: 'Hourly rhythm',
+        body: 'Sun stays mellow with a light marine layer until mid-afternoon.',
+        action: 'View hourly strip',
+        icon: '🕒',
+      },
+      {
+        title: 'Wardrobe pulse',
+        body: 'Layer a breathable sweatshirt over a tee — stash shades for late glow.',
+        action: 'Open vibe wardrobe',
+        icon: '🧥',
+      },
+      {
+        title: 'Activity cues',
+        body: 'Golden-hour walk, waterfront coffee, outdoor coworking friendly.',
+        action: 'Plan recs',
+        icon: '🌅',
+      },
+    ],
+  },
+  {
+    id: 'bk-ny',
+    name: 'Brooklyn',
+    region: 'New York',
+    country: 'United States',
+    latitude: 40.6782,
+    longitude: -73.9442,
+    timezone: 'America/New_York',
+    summary: 'Williamsburg waterfront with river breeze and evening humidity.',
+    vibe: 'Urban glow',
+    heroTemperature: 82,
+    heroFeelsLike: 85,
+    condition: 'Partly cloudy with sticky evenings',
+    tags: ['UV 6 • protect', 'Pollen moderate', 'Sunset pops at 8:21p'],
+    metrics: [
+      { label: 'Humidity', value: '71%', detail: 'Sticky after sunset' },
+      { label: 'Wind', value: '9 mph', detail: 'River breeze' },
+      { label: 'Visibility', value: '7 mi', detail: 'Haze near Midtown' },
+    ],
+    planning: [
+      {
+        title: 'Commute prep',
+        body: 'Hydrate early and pack a light linen layer for transit.',
+        action: 'Open commute kit',
+        icon: '🚌',
+      },
+      {
+        title: 'Vibe shifts',
+        body: 'Storm door approaches late tomorrow — enjoy the patio today.',
+        action: 'Peek timeline',
+        icon: '🌧️',
+      },
+      {
+        title: 'Night plans',
+        body: 'Outdoor cinema stays comfy until 10p before humidity spikes.',
+        action: 'Plan night out',
+        icon: '🌃',
+      },
+    ],
+  },
+  {
+    id: 'atx-tx',
+    name: 'Austin',
+    region: 'Texas',
+    country: 'United States',
+    latitude: 30.2672,
+    longitude: -97.7431,
+    timezone: 'America/Chicago',
+    summary: 'Downtown core with southerly winds and dry heat feel.',
+    vibe: 'Sun-bleached calm',
+    heroTemperature: 95,
+    heroFeelsLike: 99,
+    condition: 'Blazing sun with sporadic gusts',
+    tags: ['UV 9 • intense', 'Heat advisory', 'Hydrate every hour'],
+    metrics: [
+      { label: 'Humidity', value: '38%', detail: 'Dry heat' },
+      { label: 'Wind', value: '12 mph', detail: 'Southerly gusts' },
+      { label: 'Visibility', value: '10 mi', detail: 'Crystal clear' },
+    ],
+    planning: [
+      {
+        title: 'Heat pacing',
+        body: 'Earlier errands avoid the 4p heat spike — siesta recommended.',
+        action: 'View cooldown tips',
+        icon: '🔥',
+      },
+      {
+        title: 'Wardrobe sync',
+        body: 'Breathable linen or tech fabric plus a misting bottle keeps things smooth.',
+        action: 'Plan fit',
+        icon: '👕',
+      },
+      {
+        title: 'Activity cues',
+        body: 'Morning paddleboarding and late rooftop hangs both stay comfortable.',
+        action: 'Open rec deck',
+        icon: '🏄',
+      },
+    ],
+  },
+];
+
+export const defaultLocation = mockLocations[0];

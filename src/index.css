@@ -1,0 +1,69 @@
+@config "../tailwind.config.ts";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --font-display: "Space Grotesk", "Inter", "system-ui", sans-serif;
+  --font-body: "Inter", "system-ui", sans-serif;
+
+  --color-brand-sunrise: #ffc996;
+  --color-brand-zenith: #57cfff;
+  --color-brand-twilight: #7e6bff;
+
+  --color-surface-base: #050816;
+  --color-surface-raised: #0e1426;
+  --color-surface-overlay: rgba(4, 7, 18, 0.75);
+  --color-surface-outline: rgba(255, 255, 255, 0.08);
+
+  --color-text-primary: #f8fbff;
+  --color-text-secondary: rgba(248, 251, 255, 0.78);
+  --color-text-muted: rgba(248, 251, 255, 0.56);
+
+  --color-accent-warm: #ff9770;
+  --color-accent-cool: #7de7ff;
+  --color-accent-neon: #4af78d;
+
+  --gradient-vibe-coastal: linear-gradient(130deg, #5ac8fa 0%, #7e6bff 55%, #ffc996 100%);
+  --gradient-vibe-urban: linear-gradient(140deg, #7f5dff 0%, #fc67fa 45%, #fcbc02 100%);
+  --gradient-vibe-heat: linear-gradient(145deg, #ff5f6d 0%, #ffc371 100%);
+  --gradient-vibe-calm: linear-gradient(145deg, #42e695 0%, #3bb2b8 100%);
+  --gradient-vibe-default: linear-gradient(135deg, #3e4a78 0%, #141929 100%);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--font-body);
+    background-color: var(--color-surface-base);
+    color: var(--color-text-primary);
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply min-h-screen bg-surface-base text-text-primary antialiased;
+    margin: 0;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-brand-zenith) 65%, black 15%);
+    color: #050816;
+  }
+}
+
+@layer utilities {
+  .frosted-panel {
+    backdrop-filter: blur(18px);
+    background: var(--color-surface-overlay);
+  }
+}
