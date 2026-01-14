@@ -4,10 +4,11 @@ import type { LocationSnapshot } from '../features/location/types.ts';
 
 export function LocationsRoute() {
   const {
-    state: { recentLocations, selectedLocation, status, error },
+    state: { recentLocations, selectedLocation, status, error, favoriteLocations },
     search,
     selectLocation,
     detectLocation,
+    toggleFavorite,
   } = useLocationService();
 
   const [query, setQuery] = useState('');
@@ -91,10 +92,10 @@ export function LocationsRoute() {
               <button
                 key={location.id}
                 type="button"
-                className={`rounded-full border px-space-sm py-space-2xs text-sm ${
+                className={`rounded-full border px-space-sm py-space-2xs text-sm font-medium ${
                   selectedLocation.id === location.id
-                    ? 'border-brand-sunrise text-brand-sunrise'
-                    : 'border-surface-outline/70 text-text-secondary'
+                    ? 'border-transparent bg-brand-sunrise text-[var(--color-text-inverse)] shadow-sm'
+                    : 'border-surface-outline/70 text-text-secondary hover:bg-surface-raised/80'
                 }`}
                 onClick={() => handleSelect(location)}
                 data-testid="recent-location-chip"
@@ -104,28 +105,76 @@ export function LocationsRoute() {
             ))}
           </div>
         </div>
+
+        <div className="mt-space-lg">
+          <p className="text-sm font-medium uppercase tracking-[0.4em] text-text-muted">
+            Favorites
+          </p>
+          {favoriteLocations.length ? (
+            <ul className="mt-space-xs space-y-space-2xs">
+              {favoriteLocations.map((location) => (
+                <li
+                  key={location.id}
+                  className="flex items-center justify-between rounded-2xl border border-surface-outline/60 bg-surface-base/50 px-space-md py-space-2xs"
+                >
+                  <div>
+                    <p className="font-semibold text-text-primary">{location.name}</p>
+                    <p className="text-body-xs text-text-muted">
+                      {location.region}, {location.country}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-space-2xs">
+                    <button
+                      type="button"
+                      className="rounded-full border border-brand-zenith/60 px-space-sm py-space-3xs text-sm font-semibold text-brand-zenith hover:bg-brand-zenith/10"
+                      onClick={() => selectLocation(location)}
+                    >
+                      Pin
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleFavorite(location)}
+                      className="rounded-full border border-surface-outline/60 px-space-sm py-space-3xs text-sm text-text-muted transition hover:bg-surface-raised/60"
+                      aria-label={`Remove ${location.name} from favorites`}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-space-xs text-body-sm text-text-muted">
+              No favorites yet. Save a city from the hero card to access it quickly.
+            </p>
+          )}
+        </div>
       </section>
 
       <aside className="space-y-space-sm">
         <article className="rounded-3xl border border-surface-outline/60 bg-surface-raised p-space-lg">
-          <h2 className="font-display text-2xl text-text-primary">Use device location</h2>
+          <h2 className="font-display text-heading-lg text-text-primary">Use device location</h2>
           <p className="mt-space-xs text-body-sm text-text-secondary">
             Tap to try browser geolocation and snap to the closest mock city.
           </p>
           <button
             type="button"
             onClick={detectLocation}
-            className="mt-space-sm rounded-full border border-brand-zenith/60 bg-brand-zenith/10 px-space-md py-space-2xs text-sm font-semibold text-brand-zenith hover:bg-brand-zenith/20"
+            className="mt-space-sm rounded-full border border-brand-zenith/70 bg-brand-zenith px-space-md py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm transition hover:brightness-110"
           >
             {status === 'locating' ? 'Locating...' : 'Use current location'}
           </button>
-          {error ? <p className="mt-space-2xs text-body-sm text-brand-sunrise">{error}</p> : null}
+          {error ? (
+            <p className="mt-space-2xs rounded-2xl bg-brand-sunrise px-space-sm py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm">
+              {error}
+            </p>
+          ) : null}
         </article>
 
         <article className="rounded-3xl border border-surface-outline/60 bg-surface-raised p-space-lg">
           <h2 className="text-sm uppercase tracking-[0.35em] text-text-muted">Currently pinned</h2>
           <p
-            className="mt-space-xs font-display text-2xl text-brand-zenith"
+            className="mt-space-xs font-display text-heading-lg text-brand-zenith"
             data-testid="pinned-location-name"
           >
             {selectedLocation.name}

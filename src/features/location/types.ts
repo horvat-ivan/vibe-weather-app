@@ -34,6 +34,7 @@ export type LocationStateStatus = 'idle' | 'locating' | 'error';
 export type LocationState = {
   selectedLocation: LocationSnapshot;
   recentLocations: LocationSnapshot[];
+  favoriteLocations: LocationSnapshot[];
   status: LocationStateStatus;
   error: string | null;
 };

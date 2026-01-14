@@ -1,0 +1,22 @@
+{
+  "name": "Vibe Weather",
+  "short_name": "Vibe",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#050c1f",
+  "theme_color": "#050c1f",
+  "icons": [
+    {
+      "src": "/vibe-logo.svg",
+      "sizes": "256x256",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

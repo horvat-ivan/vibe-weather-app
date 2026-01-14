@@ -20,16 +20,19 @@
 - [x] Add basic analytics/logging hooks for fetch success/failure.
 - [x] Integrate a reverse-geocoding API (or hosted mock) so device coordinates resolve to real city names instead of the current hardcoded list.
 - [ ] Evaluate/replace the temporary geocoding fallback list with a managed provider (BigDataCloud, OpenCage, Mapbox) and update ADR + clients accordingly.
+- [ ] Expand location search beyond the current mock list by integrating a comprehensive city catalog or external geocoding API so queries like "Varaždin" resolve correctly, and overhaul the search UI for instant, debounced results.
 
 ## Phase 3: Vibe & Guidance Layer
 - [ ] Improve refreshed UI pass (hero/hourly/daily) with final typography, icon set, animation polish, and Storybook docs so it fully matches iOS Weather expectations.
 
 ## Phase 3: Vibe & Guidance Layer
+- [x] Design an official Vibe Weather logomark/wordmark, export responsive assets, and wire it into the hero/header, favicon, app manifest, and social share previews so the experience feels product-ready.
 - [x] Define vibe taxonomy and rule matrix.
 - [x] Implement vibe engine service with unit tests.
 - [x] Render vibe summary card with mood-specific iconography.
 - [x] Generate clothing/activity recommendations and alert tiers.
-- [ ] Enable favorites list with persistence and shareable card export.
+- [x] Enable favorites list with persistence and quick-switch chips.
+- [ ] Add shareable vibe card export + share CTA wiring.
 
 ### UI Refresh Stories (see `docs/ui-explorations.md`)
 - [x] Add an app-level loading state so the hero/planning shell only renders after the first forecast sync, including an accessible skeleton treatment.
@@ -37,13 +40,14 @@
 - [x] Respect Open-Meteo’s configured units (temperature, wind, precipitation) in the UI and expose metadata for future unit toggles.
 - [x] Simplify the main hero card by limiting copy lines, moving extended vibe summary/tags into the side card, and tightening the metric row.
 - [ ] Shift the palette to a lighter base (new surface tokens + gradients) while maintaining contrast and frosted effects.
-- [ ] Refresh typography tokens with the chosen font pairing and a documented scale applied across components.
+- [x] Refresh typography tokens with the chosen font pairing and a documented scale applied across components.
 - [x] Reduce global navigation to the essential entry points (forecast + quick location switcher) until additional routes ship.
 - [x] Detect offline mode, surface an "offline" indicator, and serve the last cached forecast instead of fake data.
 - [ ] Refresh the full UI so hero, cards, and navigation share one art direction and stay responsive across desktop + mobile. *Note: scope a design exploration first to define the unified look before coding.*
+- [ ] Audit the entire app for components still using deprecated styles and update them to the latest UI guidelines (palette, typography, chip/button patterns) so visual consistency is maintained everywhere.
 
 ## Phase 4: Offline & Resilience
-- [ ] Integrate service worker for asset + data caching.
+- [x] Integrate service worker for asset + data caching.
 - [ ] Store forecasts and preferences in IndexedDB with staleness indicators.
 - [ ] Implement offline/poor-network banners and retry flows.
 - [ ] Conduct accessibility audit (keyboard, color contrast, ARIA labels).

@@ -5,31 +5,35 @@
 
 :root {
   color-scheme: dark;
-  --font-display: "Space Grotesk", "Inter", "system-ui", sans-serif;
-  --font-body: "Inter", "system-ui", sans-serif;
+  --font-display:
+    "SF Pro Display", "Space Grotesk", "Inter", "-apple-system", "BlinkMacSystemFont", "system-ui",
+    sans-serif;
+  --font-body:
+    "SF Pro Text", "Inter", "-apple-system", "BlinkMacSystemFont", "system-ui", sans-serif;
 
   --color-brand-sunrise: #ffc996;
   --color-brand-zenith: #57cfff;
   --color-brand-twilight: #7e6bff;
 
-  --color-surface-base: #050816;
-  --color-surface-raised: #0e1426;
-  --color-surface-overlay: rgba(4, 7, 18, 0.75);
-  --color-surface-outline: rgba(255, 255, 255, 0.08);
+  --color-surface-base: #050c1f;
+  --color-surface-raised: #101c3a;
+  --color-surface-overlay: rgba(9, 16, 33, 0.76);
+  --color-surface-outline: rgba(255, 255, 255, 0.12);
 
-  --color-text-primary: #f8fbff;
-  --color-text-secondary: rgba(248, 251, 255, 0.78);
-  --color-text-muted: rgba(248, 251, 255, 0.56);
+  --color-text-primary: #f4f7ff;
+  --color-text-secondary: rgba(244, 247, 255, 0.78);
+  --color-text-muted: rgba(244, 247, 255, 0.6);
+  --color-text-inverse: #050c1f;
 
   --color-accent-warm: #ff9770;
   --color-accent-cool: #7de7ff;
   --color-accent-neon: #4af78d;
 
-  --gradient-vibe-coastal: linear-gradient(130deg, #5ac8fa 0%, #7e6bff 55%, #ffc996 100%);
-  --gradient-vibe-urban: linear-gradient(140deg, #7f5dff 0%, #fc67fa 45%, #fcbc02 100%);
-  --gradient-vibe-heat: linear-gradient(145deg, #ff5f6d 0%, #ffc371 100%);
-  --gradient-vibe-calm: linear-gradient(145deg, #42e695 0%, #3bb2b8 100%);
-  --gradient-vibe-default: linear-gradient(135deg, #3e4a78 0%, #141929 100%);
+  --gradient-vibe-coastal: linear-gradient(135deg, #0f1e4b 0%, #2857c5 45%, #6ecbff 100%);
+  --gradient-vibe-urban: linear-gradient(140deg, #1a1947 0%, #5b2dde 45%, #ff84c2 100%);
+  --gradient-vibe-heat: linear-gradient(145deg, #2b0f26 0%, #f04152 50%, #ffb347 100%);
+  --gradient-vibe-calm: linear-gradient(145deg, #072a3c 0%, #1f7a8c 55%, #8de2ff 100%);
+  --gradient-vibe-default: linear-gradient(135deg, #081838 0%, #1f3f82 45%, #65a6ff 100%);
 }
 
 @layer base {
@@ -56,8 +60,8 @@
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-brand-zenith) 65%, black 15%);
-    color: #050816;
+    background-color: color-mix(in oklab, #3d6ffb 70%, black 10%);
+    color: #fefefe;
   }
 }
 

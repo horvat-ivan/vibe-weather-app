@@ -13,13 +13,19 @@ import {
   navigatorGeolocator,
   searchMockLocations,
 } from './locationService.ts';
-import { loadStoredLocationSnapshot, persistSelectedLocationSnapshot } from './locationStorage.ts';
+import {
+  loadStoredFavoriteLocations,
+  loadStoredLocationSnapshot,
+  persistFavoriteLocations,
+  persistSelectedLocationSnapshot,
+} from './locationStorage.ts';
 import { defaultLocation } from './mockLocations.ts';
 import { type ReverseGeocodingResult, reverseGeocodeLocation } from './openMeteoGeocodingClient.ts';
 import type { Geolocator, LocationSnapshot, LocationState } from './types.ts';
 
 export const UNSUPPORTED_LOCATION_ERROR = "We're still adding support for your area.";
 const MAX_GEOLOCATION_DISTANCE_KM = 400;
+const MAX_FAVORITES = 8;
 const FALLBACK_LIVE_METRICS = [
   { label: 'Humidity', value: '—', detail: 'Syncing live data' },
   { label: 'Wind', value: '—', detail: 'Syncing live data' },
@@ -49,17 +55,23 @@ const FALLBACK_LIVE_PLANNING = [
 const defaultState: LocationState = {
   selectedLocation: defaultLocation,
   recentLocations: [defaultLocation],
+  favoriteLocations: [],
   status: 'idle',
   error: null,
 };
 
 function buildInitialState(): LocationState {
+  const favorites = loadStoredFavoriteLocations();
+  const baseState: LocationState = {
+    ...defaultState,
+    favoriteLocations: favorites.length ? favorites.slice(0, MAX_FAVORITES) : [],
+  };
   const storedLocation = loadStoredLocationSnapshot();
   if (!storedLocation) {
-    return defaultState;
+    return baseState;
   }
 
-  return applySelection(defaultState, storedLocation);
+  return applySelection(baseState, storedLocation);
 }
 
 function applySelection(state: LocationState, next: LocationSnapshot): LocationState {
@@ -106,6 +118,7 @@ type LocationServiceValue = {
   search: (query: string) => LocationSnapshot[];
   selectLocation: (location: LocationSnapshot) => void;
   detectLocation: () => Promise<void>;
+  toggleFavorite: (location: LocationSnapshot) => void;
 };
 
 const LocationServiceContext = createContext<LocationServiceValue | null>(null);
@@ -126,6 +139,16 @@ export function LocationProvider({
     activeDetectRequest.current = null;
     persistSelectedLocationSnapshot(location);
     setState((prev) => ({ ...applySelection(prev, location), status: 'idle', error: null }));
+  }, []);
+
+  const toggleFavorite = useCallback((location: LocationSnapshot) => {
+    setState((prev) => {
+      const exists = prev.favoriteLocations.some((fav) => fav.id === location.id);
+      const filtered = prev.favoriteLocations.filter((fav) => fav.id !== location.id);
+      const favoriteLocations = exists ? filtered : [location, ...filtered].slice(0, MAX_FAVORITES);
+      persistFavoriteLocations(favoriteLocations);
+      return { ...prev, favoriteLocations };
+    });
   }, []);
 
   const detectLocation = useCallback(async () => {
@@ -195,8 +218,9 @@ export function LocationProvider({
       search,
       selectLocation,
       detectLocation,
+      toggleFavorite,
     }),
-    [state, search, selectLocation, detectLocation],
+    [state, search, selectLocation, detectLocation, toggleFavorite],
   );
 
   return (

@@ -1,26 +1,25 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
+import { Logo } from './components/Logo.tsx';
 import { NetworkAwareShell } from './components/NetworkAwareShell.tsx';
 import { LocationProvider, useLocationService } from './features/location/locationContext.tsx';
 import { deriveVibeProfile } from './features/vibe/vibeEngine.ts';
 import type { OpenMeteoForecastResponse } from './features/weather/openMeteoClient.ts';
 import { useForecastForLocation } from './features/weather/useForecast.ts';
+import { FavoritesRoute } from './routes/FavoritesRoute.tsx';
 import { LocationsRoute } from './routes/LocationsRoute.tsx';
 
 function Header() {
   return (
-    <header className="border-b border-surface-outline/60 bg-surface-base/80 backdrop-blur supports-[backdrop-filter]:bg-surface-base/70">
+    <header className="border-b border-surface-outline/60 bg-surface-raised/80 backdrop-blur supports-[backdrop-filter]:bg-surface-raised/70">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-space-lg py-space-sm">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.4em] text-text-muted">vibe</p>
-          <p className="font-display text-display-md leading-tight text-brand-sunrise">Weather</p>
-        </div>
+        <Logo variant="mark" size={44} />
         <nav className="flex items-center gap-space-xs" aria-label="Primary">
           <NavLink
             to="/"
             className={({ isActive }) =>
               `rounded-full px-space-sm py-space-2xs text-sm font-medium transition-colors duration-200 ${
                 isActive
-                  ? 'bg-brand-sunrise text-surface-base'
+                  ? 'bg-brand-sunrise text-[var(--color-text-inverse)]'
                   : 'text-text-secondary hover:bg-surface-raised/70'
               }`
             }
@@ -28,12 +27,25 @@ function Header() {
             Forecast
           </NavLink>
           <NavLink
+            to="/favorites"
+            className={({ isActive }) =>
+              `rounded-full px-space-sm py-space-2xs text-sm font-medium transition-colors duration-200 ${
+                isActive
+                  ? 'bg-brand-sunrise text-[var(--color-text-inverse)]'
+                  : 'text-text-secondary hover:bg-surface-raised/70'
+              }`
+            }
+            aria-label="Favorite locations"
+          >
+            Favorites
+          </NavLink>
+          <NavLink
             to="/locations"
             data-testid="header-location-switcher"
             className={({ isActive }) =>
               `flex items-center gap-space-3xs rounded-full px-space-sm py-space-2xs text-sm font-semibold transition-colors duration-200 ${
                 isActive
-                  ? 'bg-brand-zenith/90 text-surface-base'
+                  ? 'bg-brand-zenith/90 text-[var(--color-text-inverse)]'
                   : 'text-brand-zenith border border-brand-zenith/50 hover:bg-brand-zenith/10'
               }`
             }
@@ -45,7 +57,7 @@ function Header() {
         </nav>
         <button
           type="button"
-          className="rounded-full border border-brand-zenith/60 bg-brand-zenith/20 px-space-sm py-space-2xs text-sm font-semibold text-brand-zenith transition hover:bg-brand-zenith/30"
+          className="rounded-full border border-brand-zenith/70 bg-brand-zenith px-space-sm py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm transition hover:brightness-110"
         >
           Share vibe
         </button>
@@ -67,8 +79,9 @@ function Footer() {
 
 function HomeShell() {
   const {
-    state: { selectedLocation, status, error },
+    state: { selectedLocation, status, error, favoriteLocations },
     detectLocation,
+    toggleFavorite,
   } = useLocationService();
   const {
     status: forecastStatus,
@@ -79,6 +92,7 @@ function HomeShell() {
     hasEverResolved,
   } = useForecastForLocation(selectedLocation);
   const isInitialLoading = forecastStatus === 'loading' && !hasEverResolved;
+  const isFavorite = favoriteLocations.some((location) => location.id === selectedLocation.id);
   if (isInitialLoading) {
     const fallbackTheme = getVibeTheme(selectedLocation.vibe);
     return (
@@ -205,7 +219,7 @@ function HomeShell() {
             >
               {formatMeasurement(heroTemperature)}
             </p>
-            <p className="text-2xl text-white/90" data-testid="hero-description">
+            <p className="text-heading-lg text-white/90" data-testid="hero-description">
               {heroDescription}
             </p>
             <p className="text-base text-white/85" data-testid="hero-feels-like">
@@ -227,16 +241,30 @@ function HomeShell() {
               </div>
             ))}
           </div>
-          <div className="mt-space-lg flex items-center justify-between text-sm text-white/80">
+          <div className="mt-space-lg flex flex-wrap items-center justify-between gap-space-2xs text-sm text-white/80">
             <p>Updated {updatedLabel ?? 'just now'}</p>
-            <button
-              type="button"
-              onClick={refreshForecast}
-              disabled={forecastStatus === 'loading'}
-              className="rounded-full border border-white/30 px-space-md py-space-2xs text-white/90 transition hover:bg-white/10 disabled:opacity-60"
-            >
-              {forecastStatus === 'loading' ? 'Refreshing…' : 'Refresh'}
-            </button>
+            <div className="flex gap-space-2xs">
+              <button
+                type="button"
+                onClick={refreshForecast}
+                disabled={forecastStatus === 'loading'}
+                className="rounded-full border border-white/30 px-space-md py-space-2xs text-white/90 transition hover:bg-white/10 disabled:opacity-60"
+              >
+                {forecastStatus === 'loading' ? 'Refreshing…' : 'Refresh'}
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleFavorite(selectedLocation)}
+                aria-pressed={isFavorite}
+                className={`rounded-full px-space-md py-space-2xs font-semibold transition ${
+                  isFavorite
+                    ? 'bg-white text-surface-base'
+                    : 'border border-white/30 text-white hover:bg-white/10'
+                }`}
+              >
+                {isFavorite ? 'Saved' : 'Save city'}
+              </button>
+            </div>
           </div>
         </article>
         <aside className="grid gap-space-sm">
@@ -263,12 +291,12 @@ function HomeShell() {
             onAction={refreshForecast}
           />
           {error ? (
-            <p className="rounded-2xl border border-brand-sunrise/60 bg-brand-sunrise/10 px-space-md py-space-2xs text-sm text-brand-sunrise">
+            <p className="rounded-2xl border border-transparent bg-brand-sunrise px-space-md py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm">
               {error}
             </p>
           ) : null}
           {forecastError ? (
-            <p className="rounded-2xl border border-brand-zenith/40 bg-brand-zenith/10 px-space-md py-space-2xs text-sm text-brand-zenith">
+            <p className="rounded-2xl border border-transparent bg-brand-zenith px-space-md py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm">
               {forecastError}
             </p>
           ) : null}
@@ -352,7 +380,7 @@ function VibeSummaryCard({ heading, title, tagline, summary, icon, tags }: VibeS
           </span>
         ) : null}
         <div>
-          <h3 className="font-display text-2xl text-brand-zenith">{title}</h3>
+          <h3 className="font-display text-heading-lg text-brand-zenith">{title}</h3>
           <p className="text-body-sm text-text-secondary">{tagline}</p>
         </div>
       </div>
@@ -388,7 +416,8 @@ function ForecastLoadingScreen({ gradient, locationName, region }: ForecastLoadi
       aria-label="Loading forecast"
       data-testid="forecast-loading-screen"
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/30 border-t-white text-transparent animate-spin">
+      <Logo variant="wordmark" size={40} />
+      <div className="mt-space-lg flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/30 border-t-white text-transparent animate-spin">
         <span className="sr-only">Loading…</span>
       </div>
       <div className="mt-space-lg space-y-space-2xs">
@@ -416,7 +445,7 @@ function InfoCard({ title, body, accent, actionLabel, onAction, actionDisabled }
     <article
       className={`rounded-3xl border border-surface-outline/60 p-space-lg text-text-primary ${accent ?? 'bg-surface-raised'}`}
     >
-      <h3 className="font-display text-2xl">{title}</h3>
+      <h3 className="font-display text-heading-lg">{title}</h3>
       <p className="mt-space-xs text-body-sm text-text-secondary">{body}</p>
       {actionLabel ? (
         <button
@@ -438,7 +467,11 @@ function App() {
       <NetworkAwareShell>
         <div className="relative min-h-screen overflow-hidden bg-surface-base text-text-primary">
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(circle_at_top,_rgba(126,107,255,0.35),_transparent_60%)]"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_top,_rgba(51,102,204,0.55),_transparent_70%)]"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[rgba(1,4,12,0.85)] via-transparent to-[rgba(1,4,12,0.65)]"
             aria-hidden
           />
           <div className="relative flex min-h-screen flex-col">
@@ -446,6 +479,7 @@ function App() {
             <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-space-xl px-space-lg py-space-xl">
               <Routes>
                 <Route path="/" element={<HomeShell />} />
+                <Route path="/favorites" element={<FavoritesRoute />} />
                 <Route path="/locations" element={<LocationsRoute />} />
                 <Route
                   path="/insights"
@@ -511,7 +545,7 @@ function HourlyForecast({ points, isLoading }: { points: HourlyPoint[]; isLoadin
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-text-muted">hourly outlook</p>
-          <h2 className="font-display text-2xl text-brand-zenith">Next hours</h2>
+          <h2 className="font-display text-heading-lg text-brand-zenith">Next hours</h2>
         </div>
         <span className="text-xs text-text-muted">
           {points.length ? `Next ${points.length} hrs` : ''}
@@ -531,7 +565,9 @@ function HourlyForecast({ points, isLoading }: { points: HourlyPoint[]; isLoadin
             >
               <p className="text-sm font-semibold">{point.label}</p>
               <div className="flex items-center gap-space-2xs">
-                <p className="text-2xl font-semibold">{formatMeasurement(point.temperature)}</p>
+                <p className="text-heading-lg font-semibold">
+                  {formatMeasurement(point.temperature)}
+                </p>
                 <span className="text-xl" aria-hidden>
                   {getWeatherGlyph(point.weatherCode)}
                 </span>
@@ -563,7 +599,7 @@ function DailyForecast({ days, isLoading }: { days: DailyPoint[]; isLoading: boo
   return (
     <article className="rounded-3xl border border-surface-outline/70 bg-surface-raised p-space-lg shadow-card">
       <p className="text-sm uppercase tracking-[0.35em] text-text-muted">daily trend</p>
-      <h2 className="font-display text-2xl text-brand-zenith">Upcoming days</h2>
+      <h2 className="font-display text-heading-lg text-brand-zenith">Upcoming days</h2>
       {isLoading ? <ForecastSkeleton variant="stack" /> : null}
       {!isLoading && days.length > 0 ? (
         <div className="mt-space-md space-y-space-sm">

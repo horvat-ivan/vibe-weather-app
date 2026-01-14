@@ -33,16 +33,28 @@ const config: Config = {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       fontSize: {
+        'display-2xl': [
+          'clamp(3.5rem, 7vw, 4.5rem)',
+          { lineHeight: '1.05', letterSpacing: '-0.03em' },
+        ],
+        'display-xl': ['clamp(3rem, 6vw, 4rem)', { lineHeight: '1.08', letterSpacing: '-0.02em' }],
         'display-lg': [
-          'clamp(2.5rem, 5vw, 3.5rem)',
-          { lineHeight: '1.1', letterSpacing: '-0.02em' },
+          'clamp(2.5rem, 5vw, 3.25rem)',
+          { lineHeight: '1.12', letterSpacing: '-0.015em' },
         ],
         'display-md': [
-          'clamp(1.75rem, 3vw, 2.5rem)',
-          { lineHeight: '1.2', letterSpacing: '-0.01em' },
+          'clamp(2rem, 4vw, 2.5rem)',
+          { lineHeight: '1.18', letterSpacing: '-0.01em' },
         ],
+        'heading-xl': ['1.75rem', { lineHeight: '1.25', letterSpacing: '-0.01em' }],
+        'heading-lg': ['1.5rem', { lineHeight: '1.3', letterSpacing: '-0.005em' }],
+        'heading-md': ['1.25rem', { lineHeight: '1.35' }],
+        'heading-sm': ['1.125rem', { lineHeight: '1.4' }],
         'body-lg': ['1.125rem', { lineHeight: '1.6' }],
+        'body-md': ['1rem', { lineHeight: '1.55' }],
         'body-sm': ['0.875rem', { lineHeight: '1.5' }],
+        'body-xs': ['0.75rem', { lineHeight: '1.4', letterSpacing: '0.01em' }],
+        eyebrow: ['0.75rem', { lineHeight: '1.2', letterSpacing: '0.45em' }],
       },
       spacing: {
         'space-3xs': '0.25rem',

@@ -19,7 +19,7 @@ People frequently check the weather to plan daily activities, but raw forecasts 
 2. **Forecast data**: show hourly + daily details (temperature, feels-like, precipitation, wind, humidity, sunrise/sunset) sourced from a free weather provider.
 3. **Vibe engine**: translate forecast inputs into qualitative vibes (sunny + mild => "Out & About") using a curated, non-customizable rules table aimed at simplicity.
 4. **Guidance cards**: show clothing suggestions, activity ideas, and alerts that respond to vibe outcomes and weather thresholds.
-5. **Favorites & sharing**: allow saving favorite spots and sharing a vibe card via link or exportable image.
+5. **Favorites & sharing**: allow saving favorite spots (dedicated favorites tab with quick pin/remove) and sharing a vibe card via link or exportable image.
 
 ## Non-Goals & Constraints
 - Not building a full social feed or long-range (7+ day) planner in v1.

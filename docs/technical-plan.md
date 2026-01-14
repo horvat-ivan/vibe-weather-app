@@ -4,7 +4,7 @@
 - **Client-first PWA** built with React + TypeScript + Vite for fast iteration, bundled as a single-page application that can run offline via a service worker.
 - **State Management** handled through React Query for async caching plus lightweight global context for user preferences (preferred units, saved locations).
 - **Data Layer** pulls hourly/daily forecasts from the free Open-Meteo API, which requires no API key and supports geocoordinates + timezone-aware responses.
-- **Offline + Sync** managed locally with IndexedDB (via idb wrapper) to store the last successful forecast per location and user preferences.
+- **Offline + Sync** managed via a service worker (shell + API caching) today and, in the next milestone, IndexedDB (via idb wrapper) to store the last successful forecast per location and user preferences.
 - **Notifications** delivered via the Web Push API in a later phase once core functionality stabilizes.
 
 ## 2. External Services & Contracts
@@ -24,6 +24,7 @@
 
 ## 4. Module Breakdown
 - **App Shell**: routing, layout system, theme tokens, skeleton states.
+- **Service Worker**: precaches the shell (`/`, HTML, icons) and keeps a stale-while-revalidate cache for Open-Meteo responses so the hero can hydrate from offline data before the network returns.
 - **Location Service**: wraps Geolocation API, Open-Meteo geocoding, and saved locations storage.
 - **Forecast Client**: typed fetcher with retry/backoff, unit normalization, and React Query integration.
 - **Vibe Engine**: deterministic rule evaluation based on temperature bands, feels-like deltas, precipitation probability, wind speed, daylight, and humidity.

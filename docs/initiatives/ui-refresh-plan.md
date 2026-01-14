@@ -69,6 +69,7 @@ Phase 5 introduces a lower-priority track to uplift the interface so it feels cl
 - Persistent location pill at top with chevron to open sheet.
 - Favorites view uses list of cards with thumbnail map/icon; can reorder via drag handle.
 - Manual search uses sticky search bar with material-style suggestions.
+- Display up to eight favorite chips inline beneath the hero for fast switching; tapping a chip pins the forecast immediately and updates the vibe summary.
 
 ### 7. Alerts & System States
 - Global banner style for offline/poor network (icons + CTA to retry).
@@ -117,3 +118,4 @@ Phase 5 introduces a lower-priority track to uplift the interface so it feels cl
 - **Hero refresh**: Rebuilt the current-conditions hero to mirror iOS Weather’s hierarchy — oversized temperature glyph, single-line feel-like/high-low copy, and subdued gradient background tied to each vibe. Quick action clusters were removed in favor of a single refresh button and a concise “updated” timestamp so the card reads at a glance.
 - **Hourly timeline**: Chips now follow the native pattern (time, icon, temp, precip) with a muted rail and the active hour highlighted; glyphs map directly from Open-Meteo weather codes so parity with Apple Weather icons is straightforward once custom assets land.
 - **Daily outlook**: Rows emphasize weekday, sunrise/sunset, rain chance, and a simple “warmer/cooler than today” delta to keep the copy terse while matching iOS typography scale. These refinements keep the layout touch-friendly while aligning with the refresh goals above and will serve as the baseline for future motion/asset polish.
+- **Favorites view**: Inline chips were removed in favor of a dedicated Favorites tab that lists saved cities with pin/remove controls, keeping the hero focused while still honoring the quick-switch goal in a way that matches the navigation model.

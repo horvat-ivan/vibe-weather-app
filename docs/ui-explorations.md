@@ -20,12 +20,24 @@ Goal: break down the pending UI polish work into concrete, bite-sized stories be
 ## 4. Palette Exploration (Lighter Blues)
 - **Current state:** Root tokens favor deep navy backgrounds (`--color-surface-base: #050816`, `--color-surface-raised: #0e1426`) making the entire UI feel heavy (`src/index.css:6`).
 - **Pain:** Users noted the shell reads as “stormy” even during calm vibes; cards lack contrast against the dark base, and gradients are mostly dark.
-- **Proposal:** Explore a lighter base palette (ice blue / slate) while keeping frosted treatment. Update Tailwind tokens to new surface/background colors, evaluate gradient presets per vibe, and ensure AA contrast. Acceptance: produce at least two palette mockups (light/cool + neutral) and document the chosen hex tokens before coding.
+- **Exploration (Feb 2025):**
+  - *Cool Mist* (implemented) — airy, ice-blue base for the shell while keeping saturated gradients for hero/CTAs. Tokens: `surface.base #E8F1FF`, `surface.raised #F8FBFF`, `surface.outline rgba(15,23,42,0.14)`, `surface.overlay rgba(255,255,255,0.78)`, `text.primary #0F1A2B`, `text.secondary rgba(15,26,43,0.78)`, `text.muted rgba(15,26,43,0.58)`, gradients refreshed to lighter blues/corals.
+- *Soft Neutral* (backlog) — warmer parchment base (`surface.base #F5EFE6`, `surface.raised #FFFBF5`) paired with desaturated lilac gradients. Parking this option for a future seasonal theme.
+- **Decision:** Adopt the Cool Mist palette and update the CSS custom properties/Tailwind tokens (`src/index.css`, `tailwind.config.ts`). Cards now sit on a light icy backdrop, the frosted glass overlay uses translucent white, and hero gradients were refreshed (`--gradient-vibe-*`) to maintain contrast for white hero text.
+- **Accessibility follow-up (Feb 2025):** Brightened `surface.base` to `#F5F8FF`, set `surface.raised` to `#FFFFFF`, introduced a `--color-text-inverse` token, and converted pills/alerts to filled chips so all text-on-background pairs meet WCAG 2.1 AA (≥4.5:1 for body text).
+- **iOS alignment (Feb 2025):** After testing the lighter shell in situ, reverted to a dark navy base that mirrors Apple Weather (deep blue gradient background, white type, frosted navy cards). Tokens now use `surface.base #050C1F`, `surface.raised #101C3A`, and hero gradients pull from the iOS temperature palette so the main temperature block, hero status, and loading screen keep white text without legibility issues.
+
+## Accessibility & Contrast Notes
+- Default text now uses near-white (`#F4F7FF`) on the deep navy base for ~14:1 contrast.
+- All "brand" CTAs (Share vibe, device location, alert banners) flip to solid brand backgrounds with `--color-text-inverse` (navy) so pills mimic iOS Weather while staying readable.
+- Chips and tags gained either frosted navy outlines or filled brand states. Avoid outline-only treatments unless text remains ≥4.5:1.
+- Hero + loading gradients mirror the iOS palette (deep blue → cyan) so the temperature, description, and vibe label all use white text with sufficient luminance contrast.
 
 ## 5. Typography Refresh
 - **Current state:** Display font uses Space Grotesk, body uses Inter (`src/index.css:6`). We rely on Tailwind classes but no custom tracking/line-height beyond hero.
 - **Pain:** The geometric display font + all-caps tracking feels rigid; spacing inconsistencies show up across cards.
 - **Proposal:** Audit new font pairings (e.g., `Clash Display` + `General Sans` or `Satoshi`). Define an updated scale (e.g., display-xl, heading-lg, body-md) and map to Tailwind theme for consistency. Acceptance: document font choices, fallback stack, and scale in this file; update theme tokens accordingly in the implementation phase.
+- **Update (Feb 2025):** Adopted Apple-inspired stacks (`SF Pro Display` + `SF Pro Text` with `Inter` fallbacks) via CSS variables and refreshed the Tailwind scale. New tokens: `display-2xl`→`display-md` (hero/section headers), `heading-xl`→`heading-sm` (card titles), and `body-lg/body-md/body-sm/body-xs` plus an `eyebrow` style for pills. All key components now use the semantic classes so typography stays consistent with iOS Weather expectations.
 
 ## 6. Simplify Navigation (Remove Tabs Until Needed)
 - **Current state:** Header shows three NavLink pills (Forecast, Locations, Insights) but only home/locations have real UI, and insights is a placeholder (`src/App.tsx:15-47`).
