@@ -1,16 +1,10 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
 import { NetworkAwareShell } from './components/NetworkAwareShell.tsx';
 import { LocationProvider, useLocationService } from './features/location/locationContext.tsx';
-import { deriveVibeProfile, type VibeProfile } from './features/vibe/vibeEngine.ts';
+import { deriveVibeProfile } from './features/vibe/vibeEngine.ts';
 import type { OpenMeteoForecastResponse } from './features/weather/openMeteoClient.ts';
 import { useForecastForLocation } from './features/weather/useForecast.ts';
 import { LocationsRoute } from './routes/LocationsRoute.tsx';
-
-const navItems = [
-  { label: 'Forecast', path: '/' },
-  { label: 'Locations', path: '/locations' },
-  { label: 'Insights', path: '/insights' },
-];
 
 function Header() {
   return (
@@ -20,22 +14,34 @@ function Header() {
           <p className="text-sm font-medium uppercase tracking-[0.4em] text-text-muted">vibe</p>
           <p className="font-display text-display-md leading-tight text-brand-sunrise">Weather</p>
         </div>
-        <nav className="flex items-center gap-space-xs">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `rounded-full px-space-sm py-space-2xs text-sm font-medium transition-colors duration-200 ${
-                  isActive
-                    ? 'bg-brand-sunrise text-surface-base'
-                    : 'text-text-secondary hover:bg-surface-raised/70'
-                }`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
+        <nav className="flex items-center gap-space-xs" aria-label="Primary">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `rounded-full px-space-sm py-space-2xs text-sm font-medium transition-colors duration-200 ${
+                isActive
+                  ? 'bg-brand-sunrise text-surface-base'
+                  : 'text-text-secondary hover:bg-surface-raised/70'
+              }`
+            }
+          >
+            Forecast
+          </NavLink>
+          <NavLink
+            to="/locations"
+            data-testid="header-location-switcher"
+            className={({ isActive }) =>
+              `flex items-center gap-space-3xs rounded-full px-space-sm py-space-2xs text-sm font-semibold transition-colors duration-200 ${
+                isActive
+                  ? 'bg-brand-zenith/90 text-surface-base'
+                  : 'text-brand-zenith border border-brand-zenith/50 hover:bg-brand-zenith/10'
+              }`
+            }
+            aria-label="Manage locations"
+          >
+            <span aria-hidden>📍</span>
+            <span>Locations</span>
+          </NavLink>
         </nav>
         <button
           type="button"
@@ -127,13 +133,24 @@ function HomeShell() {
   const vibeLabel = vibeProfile?.name ?? selectedLocation.vibe;
   const vibeTheme = getVibeTheme(vibeLabel);
   const vibeTags = vibeProfile?.tags?.length ? vibeProfile.tags : selectedLocation.tags;
-  const heroNarrative = vibeProfile
-    ? `${vibeProfile.tagline} · ${vibeProfile.summary}`
-    : selectedLocation.summary;
   const planningTiles = vibeProfile
     ? [vibeProfile.wardrobe, vibeProfile.activities, vibeProfile.alerts]
     : selectedLocation.planning;
   const locationSummary = vibeProfile?.summary ?? selectedLocation.summary;
+  const vibeSummaryHeading = vibeProfile ? "Today's vibe" : 'Pinned vibe';
+  const vibeSummaryContent = vibeProfile
+    ? {
+        title: vibeProfile.name,
+        tagline: vibeProfile.tagline,
+        summary: vibeProfile.summary,
+        icon: vibeProfile.icon,
+      }
+    : {
+        title: selectedLocation.vibe,
+        tagline: selectedLocation.condition,
+        summary: selectedLocation.summary,
+        icon: null,
+      };
   const currentWeather = forecast?.current_weather;
   const liveForecastCopy = (() => {
     if (forecastStatus === 'loading' && !currentWeather) {
@@ -172,13 +189,16 @@ function HomeShell() {
           className="rounded-[32px] border border-white/5 p-space-xl text-white shadow-[0_30px_120px_rgba(0,0,0,0.35)]"
           style={{ backgroundImage: vibeTheme.gradient }}
         >
-          <div className="space-y-space-xs">
-            <h1
-              className="text-sm uppercase tracking-[0.35em] text-white/75"
-              data-testid="hero-vibe-label"
-            >
-              {vibeLabel}
-            </h1>
+          <div className="space-y-space-2xs">
+            <div className="flex items-center justify-between text-[13px] uppercase tracking-[0.35em] text-white/70">
+              <p>Now</p>
+              <span
+                data-testid="hero-vibe-label"
+                className="rounded-full border border-white/30 px-space-sm py-space-3xs text-[11px] font-semibold uppercase tracking-[0.35em] text-white"
+              >
+                {vibeLabel}
+              </span>
+            </div>
             <p
               className="font-display text-[94px] font-light leading-[0.85]"
               data-testid="hero-temperature"
@@ -188,32 +208,22 @@ function HomeShell() {
             <p className="text-2xl text-white/90" data-testid="hero-description">
               {heroDescription}
             </p>
-            <p className="text-base text-white/80" data-testid="hero-feels-like">
-              Feels like {formatMeasurement(heroFeelsLike)} · H:{formatMeasurement(todayHigh)} L:
-              {formatMeasurement(todayLow)} · {selectedLocation.name}, {selectedLocation.region}
+            <p className="text-base text-white/85" data-testid="hero-feels-like">
+              Feels like {formatMeasurement(heroFeelsLike)} · H:{formatMeasurement(todayHigh)} · L:
+              {formatMeasurement(todayLow)}
             </p>
-            <p className="text-sm text-white/70">{heroNarrative}</p>
+            <p className="text-sm text-white/75">
+              {selectedLocation.name}, {selectedLocation.region} ·{' '}
+              {updatedLabel ? `Updated ${updatedLabel}` : 'Syncing latest data'}
+            </p>
           </div>
-          {vibeTags?.length ? (
-            <div className="mt-space-sm flex flex-wrap gap-space-2xs">
-              {vibeTags.map((tag) => (
-                <span
-                  key={tag}
-                  className={`rounded-full px-space-sm py-space-3xs text-[11px] font-semibold uppercase tracking-[0.35em] ${vibeTheme.tagClass}`}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          <div className="mt-space-lg flex flex-wrap gap-space-md text-sm text-white/90">
+          <div className="mt-space-lg flex flex-wrap gap-space-xl text-sm text-white/90">
             {heroMetrics.map((metric) => (
               <div key={metric.label} className="flex flex-col">
                 <span className="text-[13px] uppercase tracking-[0.3em] text-white/70">
                   {metric.label}
                 </span>
                 <span className="text-xl font-semibold">{metric.value}</span>
-                <span className="text-xs text-white/70">{metric.detail}</span>
               </div>
             ))}
           </div>
@@ -230,15 +240,14 @@ function HomeShell() {
           </div>
         </article>
         <aside className="grid gap-space-sm">
-          {vibeProfile ? (
-            <VibeSummaryCard profile={vibeProfile} tags={vibeTags} />
-          ) : (
-            <InfoCard
-              title="Active alert window"
-              accent="bg-gradient-to-r from-brand-twilight/30 to-brand-sunrise/30"
-              body="No disruptive weather expected. Sneaker-safe sidewalks and steady air quality."
-            />
-          )}
+          <VibeSummaryCard
+            heading={vibeSummaryHeading}
+            title={vibeSummaryContent.title}
+            tagline={vibeSummaryContent.tagline}
+            summary={vibeSummaryContent.summary}
+            icon={vibeSummaryContent.icon}
+            tags={vibeTags}
+          />
           <InfoCard
             title="Location profile"
             body={`Pinned to ${selectedLocation.name}, ${selectedLocation.region}. ${locationSummary}`}
@@ -323,22 +332,31 @@ type InfoCardProps = {
   onAction?: () => void;
 };
 
-function VibeSummaryCard({ profile, tags }: { profile: VibeProfile; tags: string[] }) {
+type VibeSummaryCardProps = {
+  heading: string;
+  title: string;
+  tagline: string;
+  summary: string;
+  icon: string | null;
+  tags: string[];
+};
+
+function VibeSummaryCard({ heading, title, tagline, summary, icon, tags }: VibeSummaryCardProps) {
   return (
     <article className="rounded-3xl border border-surface-outline/60 bg-surface-raised p-space-lg text-text-primary shadow-card">
-      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-text-muted">
-        Today's vibe
-      </p>
+      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-text-muted">{heading}</p>
       <div className="mt-space-2xs flex items-center gap-space-sm">
-        <span className="text-4xl" aria-hidden>
-          {profile.icon}
-        </span>
+        {icon ? (
+          <span className="text-4xl" aria-hidden>
+            {icon}
+          </span>
+        ) : null}
         <div>
-          <h3 className="font-display text-2xl text-brand-zenith">{profile.name}</h3>
-          <p className="text-body-sm text-text-secondary">{profile.tagline}</p>
+          <h3 className="font-display text-2xl text-brand-zenith">{title}</h3>
+          <p className="text-body-sm text-text-secondary">{tagline}</p>
         </div>
       </div>
-      <p className="mt-space-sm text-body-sm text-text-primary/90">{profile.summary}</p>
+      <p className="mt-space-sm text-body-sm text-text-primary/90">{summary}</p>
       {tags.length ? (
         <div className="mt-space-sm flex flex-wrap gap-space-2xs">
           {tags.map((tag) => (

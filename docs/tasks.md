@@ -35,11 +35,12 @@
 - [x] Add an app-level loading state so the hero/planning shell only renders after the first forecast sync, including an accessible skeleton treatment.
 - [x] Prevent full-screen loading on subsequent refreshes—show cached forecast while new data loads and only use the loading screen when no prior forecast exists.
 - [x] Respect Open-Meteo’s configured units (temperature, wind, precipitation) in the UI and expose metadata for future unit toggles.
-- [ ] Simplify the main hero card by limiting copy lines, moving extended vibe summary/tags into the side card, and tightening the metric row.
+- [x] Simplify the main hero card by limiting copy lines, moving extended vibe summary/tags into the side card, and tightening the metric row.
 - [ ] Shift the palette to a lighter base (new surface tokens + gradients) while maintaining contrast and frosted effects.
 - [ ] Refresh typography tokens with the chosen font pairing and a documented scale applied across components.
-- [ ] Reduce global navigation to the essential entry points (forecast + quick location switcher) until additional routes ship.
+- [x] Reduce global navigation to the essential entry points (forecast + quick location switcher) until additional routes ship.
 - [x] Detect offline mode, surface an "offline" indicator, and serve the last cached forecast instead of fake data.
+- [ ] Refresh the full UI so hero, cards, and navigation share one art direction and stay responsive across desktop + mobile. *Note: scope a design exploration first to define the unified look before coding.*
 
 ## Phase 4: Offline & Resilience
 - [ ] Integrate service worker for asset + data caching.
