@@ -9,6 +9,7 @@ export type ReverseGeocodingRequestOptions = {
   count?: number;
   language?: string;
   signal?: AbortSignal;
+  forceFallback?: boolean;
 };
 
 export type ReverseGeocodingResult = {
@@ -87,6 +88,15 @@ export async function reverseGeocodeLocation(
   fetcher: Fetcher | undefined = globalThis.fetch,
 ): Promise<ReverseGeocodingResult | null> {
   const fallbackResult = findFallbackGeocode(options.latitude, options.longitude);
+  const envForceFallback =
+    typeof import.meta !== 'undefined' &&
+    typeof import.meta.env !== 'undefined' &&
+    import.meta.env.VITE_GEO_OFFLINE === 'true';
+  const shouldForceFallback = options.forceFallback ?? envForceFallback;
+
+  if (shouldForceFallback) {
+    return fallbackResult;
+  }
   if (!fetcher) {
     return fallbackResult;
   }

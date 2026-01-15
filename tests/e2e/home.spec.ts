@@ -22,7 +22,7 @@ test.describe('Home shell', () => {
   test('navigates to the locations route via nav link', async ({ page }) => {
     await page.goto('/');
 
-    await page.getByRole('link', { name: /locations/i }).click();
+    await page.getByTestId('header-location-switcher').click();
     await expect(page).toHaveURL(/\/locations$/);
     await expect(page.getByRole('heading', { name: /saved locations/i })).toBeVisible();
   });

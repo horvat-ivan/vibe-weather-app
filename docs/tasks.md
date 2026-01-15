@@ -21,6 +21,13 @@
 - [x] Integrate a reverse-geocoding API (or hosted mock) so device coordinates resolve to real city names instead of the current hardcoded list.
 - [ ] Evaluate/replace the temporary geocoding fallback list with a managed provider (BigDataCloud, OpenCage, Mapbox) and update ADR + clients accordingly.
 - [ ] Expand location search beyond the current mock list by integrating a comprehensive city catalog or external geocoding API so queries like "Varaždin" resolve correctly, and overhaul the search UI for instant, debounced results.
+- [ ] Auto-trigger geolocation detection on app bootstrap so we prompt for browser permission immediately and only fall back to stored/default snapshots when access is denied or unavailable. Document the flow in the tech plan.
+- [ ] Add a first-time location permission prompt (modal or banner) that explains the benefit of sharing location, captures “Not now/Allow”, and suppresses repeated prompts once a preference is stored.
+- [ ] Design and implement a dedicated "permission denied" state (banner/card) that instructs users how to re-enable access and offers a retry CTA wired to `detectLocation`.
+- [ ] Instrument analytics for geolocation allow/deny/timeouts so we can monitor how many sessions succeed or fail and why.
+- [ ] Remove redundant "Use current location" hero CTA once the auto-detect + prompt flow is in place, updating tests/routes accordingly.
+- [ ] Add unit coverage for the new permission prompt logic plus a Playwright journey that simulates granting/denying geolocation (mocking the API) to keep CI green.
+- [x] Add a developer/offline flag that forces reverse geocoding to use the fallback list (skip network calls) so local builds don’t surface console noise when the Open-Meteo API is unreachable.
 
 ## Phase 3: Vibe & Guidance Layer
 - [ ] Improve refreshed UI pass (hero/hourly/daily) with final typography, icon set, animation polish, and Storybook docs so it fully matches iOS Weather expectations.

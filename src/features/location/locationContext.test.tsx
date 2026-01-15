@@ -2,6 +2,11 @@ import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  logFavoriteToggled,
+  logGeolocationFailure,
+  logGeolocationSuccess,
+} from '../../lib/analytics.ts';
+import {
   LocationProvider,
   UNSUPPORTED_LOCATION_ERROR,
   useLocationService,
@@ -14,8 +19,16 @@ import type { Geolocator } from './types.ts';
 vi.mock('./openMeteoGeocodingClient.ts', () => ({
   reverseGeocodeLocation: vi.fn(),
 }));
+vi.mock('../../lib/analytics.ts', () => ({
+  logGeolocationFailure: vi.fn(),
+  logGeolocationSuccess: vi.fn(),
+  logFavoriteToggled: vi.fn(),
+}));
 
 const mockedReverseGeocodeLocation = vi.mocked(reverseGeocodeLocation);
+const mockedLogGeolocationSuccess = vi.mocked(logGeolocationSuccess);
+const mockedLogGeolocationFailure = vi.mocked(logGeolocationFailure);
+const mockedLogFavoriteToggled = vi.mocked(logFavoriteToggled);
 
 function renderLocationHook(geolocator: Geolocator | null = null) {
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -83,6 +96,12 @@ describe('LocationProvider persistence', () => {
     const storedValue = window.localStorage.getItem(SELECTED_LOCATION_STORAGE_KEY);
     expect(storedValue).not.toBeNull();
     expect(JSON.parse(storedValue ?? '{}').id).toBe(targetLocation.id);
+    expect(mockedLogGeolocationSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'mock-match',
+        resolvedLocationId: targetLocation.id,
+      }),
+    );
   });
 
   it('ignores late geolocation results after a manual selection', async () => {
@@ -131,6 +150,9 @@ describe('LocationProvider persistence', () => {
     expect(result.current.state.selectedLocation.id).toBe(mockLocations[0].id);
     expect(result.current.state.error).toBe(UNSUPPORTED_LOCATION_ERROR);
     expect(window.localStorage.getItem(SELECTED_LOCATION_STORAGE_KEY)).toBeNull();
+    expect(mockedLogGeolocationFailure).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: 'reverse_geocode_failed' }),
+    );
   });
 
   it('pins a geocoded location when outside mock coverage', async () => {
@@ -159,5 +181,63 @@ describe('LocationProvider persistence', () => {
     const storedValue = window.localStorage.getItem(SELECTED_LOCATION_STORAGE_KEY);
     expect(storedValue).not.toBeNull();
     expect(JSON.parse(storedValue ?? '{}').name).toBe('Paris');
+    expect(mockedLogGeolocationSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ method: 'reverse-geocode', resolvedLocationId: 'geo-42' }),
+    );
+  });
+
+  it('logs failures when geolocation is unavailable', async () => {
+    const { result } = renderLocationHook(null);
+
+    await act(async () => {
+      await result.current.detectLocation();
+    });
+
+    expect(mockedLogGeolocationFailure).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: 'unsupported' }),
+    );
+  });
+
+  it('logs permission-denied errors from the browser', async () => {
+    const mockError = Object.assign(new Error('User denied Geolocation'), { code: 1 });
+    const mockGeolocator: Geolocator = vi.fn().mockRejectedValue(mockError);
+    const { result } = renderLocationHook(mockGeolocator);
+
+    await act(async () => {
+      await result.current.detectLocation();
+    });
+
+    expect(mockedLogGeolocationFailure).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: 'permission_denied' }),
+    );
+  });
+
+  it('logs favorite toggles with counts', () => {
+    const { result } = renderLocationHook();
+    const targetLocation = mockLocations[1];
+
+    act(() => {
+      result.current.toggleFavorite(targetLocation);
+    });
+
+    expect(mockedLogFavoriteToggled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'added',
+        locationId: targetLocation.id,
+        totalFavorites: 1,
+      }),
+    );
+
+    act(() => {
+      result.current.toggleFavorite(targetLocation);
+    });
+
+    expect(mockedLogFavoriteToggled).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'removed',
+        locationId: targetLocation.id,
+        totalFavorites: 0,
+      }),
+    );
   });
 });

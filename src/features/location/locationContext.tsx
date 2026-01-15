@@ -8,6 +8,12 @@ import {
   useState,
 } from 'react';
 import {
+  type GeolocationFailureEvent,
+  logFavoriteToggled,
+  logGeolocationFailure,
+  logGeolocationSuccess,
+} from '../../lib/analytics.ts';
+import {
   findClosestMockLocation,
   MAX_RECENT_LOCATIONS,
   navigatorGeolocator,
@@ -72,6 +78,45 @@ function buildInitialState(): LocationState {
   }
 
   return applySelection(baseState, storedLocation);
+}
+
+type GeolocationFailureReason = GeolocationFailureEvent['reason'];
+
+function mapGeolocationErrorToReason(error: unknown): GeolocationFailureReason {
+  if (error && typeof error === 'object' && 'code' in error) {
+    const code =
+      typeof (error as { code?: number }).code === 'number'
+        ? (error as { code?: number }).code
+        : null;
+    if (code === 1) {
+      return 'permission_denied';
+    }
+    if (code === 2) {
+      return 'position_unavailable';
+    }
+    if (code === 3) {
+      return 'timeout';
+    }
+  }
+
+  if (error instanceof DOMException && error.name === 'NotAllowedError') {
+    return 'permission_denied';
+  }
+
+  if (error instanceof Error) {
+    const normalized = error.message.trim().toLowerCase();
+    if (normalized.includes('permission')) {
+      return 'permission_denied';
+    }
+    if (normalized.includes('timeout')) {
+      return 'timeout';
+    }
+    if (normalized.includes('unavailable')) {
+      return 'position_unavailable';
+    }
+  }
+
+  return 'unknown';
 }
 
 function applySelection(state: LocationState, next: LocationSnapshot): LocationState {
@@ -147,16 +192,23 @@ export function LocationProvider({
       const filtered = prev.favoriteLocations.filter((fav) => fav.id !== location.id);
       const favoriteLocations = exists ? filtered : [location, ...filtered].slice(0, MAX_FAVORITES);
       persistFavoriteLocations(favoriteLocations);
+      logFavoriteToggled({
+        locationId: location.id,
+        action: exists ? 'removed' : 'added',
+        totalFavorites: favoriteLocations.length,
+      });
       return { ...prev, favoriteLocations };
     });
   }, []);
 
   const detectLocation = useCallback(async () => {
     if (!geolocator) {
+      const message = 'Geolocation unavailable on this device.';
+      logGeolocationFailure({ reason: 'unsupported', message });
       setState((prev) => ({
         ...prev,
         status: 'error',
-        error: 'Geolocation unavailable on this device.',
+        error: message,
       }));
       return;
     }
@@ -164,6 +216,7 @@ export function LocationProvider({
     const requestToken = Symbol('detect-location');
     activeDetectRequest.current = requestToken;
     setState((prev) => ({ ...prev, status: 'locating', error: null }));
+    let pendingReverseGeocode = false;
     try {
       const coords = await geolocator();
       if (activeDetectRequest.current !== requestToken) {
@@ -171,11 +224,17 @@ export function LocationProvider({
       }
       const { location: matchedLocation, distanceKm } = findClosestMockLocation(coords);
       if (distanceKm > MAX_GEOLOCATION_DISTANCE_KM) {
+        pendingReverseGeocode = true;
         const geocoded = await reverseGeocodeLocation({
           latitude: coords.latitude,
           longitude: coords.longitude,
         });
+        pendingReverseGeocode = false;
         if (!geocoded) {
+          logGeolocationFailure({
+            reason: 'reverse_geocode_failed',
+            message: UNSUPPORTED_LOCATION_ERROR,
+          });
           setState((prev) => ({
             ...prev,
             status: 'error',
@@ -186,6 +245,12 @@ export function LocationProvider({
 
         const snapshot = buildGeocodedSnapshot(geocoded);
         persistSelectedLocationSnapshot(snapshot);
+        logGeolocationSuccess({
+          method: 'reverse-geocode',
+          coordinates: coords,
+          resolvedLocationId: snapshot.id,
+          distanceKm,
+        });
         setState((prev) => ({
           ...applySelection(prev, snapshot),
           status: 'idle',
@@ -194,6 +259,12 @@ export function LocationProvider({
         return;
       }
       persistSelectedLocationSnapshot(matchedLocation);
+      logGeolocationSuccess({
+        method: 'mock-match',
+        coordinates: coords,
+        resolvedLocationId: matchedLocation.id,
+        distanceKm,
+      });
       setState((prev) => ({
         ...applySelection(prev, matchedLocation),
         status: 'idle',
@@ -204,6 +275,12 @@ export function LocationProvider({
         return;
       }
       const message = error instanceof Error ? error.message : 'Unable to determine location.';
+      logGeolocationFailure({
+        reason: pendingReverseGeocode
+          ? 'reverse_geocode_failed'
+          : mapGeolocationErrorToReason(error),
+        message,
+      });
       setState((prev) => ({ ...prev, status: 'error', error: message }));
     } finally {
       if (activeDetectRequest.current === requestToken) {

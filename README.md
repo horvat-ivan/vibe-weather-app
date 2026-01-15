@@ -16,6 +16,8 @@ Modern PWA shell for translating weather data into vibe-forward guidance. Built 
 
 > **Playwright note:** after installing dependencies run `pnpm exec playwright install --with-deps chromium webkit` once to download the required browsers. The CLI sandbox here cannot bind to local ports, so run the E2E suite on your workstation to see it pass end-to-end.
 
+Need to stay offline? Create a `.env.local` with `VITE_GEO_OFFLINE=true` so reverse geocoding skips the Open-Meteo call and relies on our curated fallback list—perfect for air-gapped dev shells.
+
 ## Quality Gate Before Task Sign-off
 
 Guard scripts hook into commits and will block merges if any required check fails. Before declaring a task complete or requesting review, run `pnpm lint`, `pnpm test`, `pnpm test:e2e`, and `pnpm build` locally and fix all failures so the hooks and CI pass cleanly.

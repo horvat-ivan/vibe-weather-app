@@ -1,7 +1,9 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
+import { ConnectivityBanner } from './components/ConnectivityBanner.tsx';
 import { Logo } from './components/Logo.tsx';
 import { NetworkAwareShell } from './components/NetworkAwareShell.tsx';
 import { LocationProvider, useLocationService } from './features/location/locationContext.tsx';
+import { useShareVibe } from './features/vibe/useShareVibe.ts';
 import { deriveVibeProfile } from './features/vibe/vibeEngine.ts';
 import type { OpenMeteoForecastResponse } from './features/weather/openMeteoClient.ts';
 import { useForecastForLocation } from './features/weather/useForecast.ts';
@@ -9,6 +11,7 @@ import { FavoritesRoute } from './routes/FavoritesRoute.tsx';
 import { LocationsRoute } from './routes/LocationsRoute.tsx';
 
 function Header() {
+  const { shareVibe, feedback, isSharing } = useShareVibe();
   return (
     <header className="border-b border-surface-outline/60 bg-surface-raised/80 backdrop-blur supports-[backdrop-filter]:bg-surface-raised/70">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-space-lg py-space-sm">
@@ -55,12 +58,27 @@ function Header() {
             <span>Locations</span>
           </NavLink>
         </nav>
-        <button
-          type="button"
-          className="rounded-full border border-brand-zenith/70 bg-brand-zenith px-space-sm py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm transition hover:brightness-110"
-        >
-          Share vibe
-        </button>
+        <div className="flex flex-col items-end gap-space-3xs">
+          <button
+            type="button"
+            onClick={shareVibe}
+            disabled={isSharing}
+            className="rounded-full border border-brand-zenith/70 bg-brand-zenith px-space-sm py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isSharing ? 'Sharing...' : 'Share vibe'}
+          </button>
+          {feedback ? (
+            <output
+              aria-live="polite"
+              data-testid="share-feedback"
+              className={`text-[13px] font-medium ${
+                feedback.type === 'success' ? 'text-accent-neon' : 'text-accent-warm'
+              }`}
+            >
+              {feedback.message}
+            </output>
+          ) : null}
+        </div>
       </div>
     </header>
   );
@@ -93,6 +111,12 @@ function HomeShell() {
   } = useForecastForLocation(selectedLocation);
   const isInitialLoading = forecastStatus === 'loading' && !hasEverResolved;
   const isFavorite = favoriteLocations.some((location) => location.id === selectedLocation.id);
+  const isLocating = status === 'locating';
+  const showForecastRetryBanner = forecastStatus === 'error';
+  const showLocationErrorBanner = Boolean(error);
+  const connectivityDescription = forecastError
+    ? `${forecastError} Please retry once the connection stabilizes.`
+    : 'We could not refresh the live forecast. Check your network and try again.';
   if (isInitialLoading) {
     const fallbackTheme = getVibeTheme(selectedLocation.vibe);
     return (
@@ -198,6 +222,30 @@ function HomeShell() {
 
   return (
     <div className="flex flex-col gap-space-xl" aria-busy={forecastStatus === 'loading'}>
+      {showForecastRetryBanner || showLocationErrorBanner ? (
+        <div className="space-y-space-2xs">
+          {showForecastRetryBanner ? (
+            <ConnectivityBanner
+              title="Forecast sync interrupted"
+              description={connectivityDescription}
+              actionLabel={forecastStatus === 'loading' ? 'Retrying…' : 'Retry sync'}
+              actionDisabled={forecastStatus === 'loading'}
+              onAction={refreshForecast}
+              testId="forecast-retry-banner"
+            />
+          ) : null}
+          {showLocationErrorBanner ? (
+            <ConnectivityBanner
+              title="Location update failed"
+              description={error ?? 'Unable to determine your current city.'}
+              actionLabel={status === 'locating' ? 'Detecting…' : 'Try again'}
+              actionDisabled={status === 'locating'}
+              onAction={detectLocation}
+              testId="location-error-banner"
+            />
+          ) : null}
+        </div>
+      ) : null}
       <section className="grid gap-space-lg lg:grid-cols-[1.8fr_1fr]">
         <article
           className="rounded-[32px] border border-white/5 p-space-xl text-white shadow-[0_30px_120px_rgba(0,0,0,0.35)]"
@@ -243,7 +291,16 @@ function HomeShell() {
           </div>
           <div className="mt-space-lg flex flex-wrap items-center justify-between gap-space-2xs text-sm text-white/80">
             <p>Updated {updatedLabel ?? 'just now'}</p>
-            <div className="flex gap-space-2xs">
+            <div className="flex flex-wrap gap-space-2xs">
+              <button
+                type="button"
+                onClick={detectLocation}
+                disabled={isLocating}
+                data-testid="hero-detect-location"
+                className="rounded-full border border-white/30 px-space-md py-space-2xs text-white/90 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isLocating ? 'Locating...' : 'Use current location'}
+              </button>
               <button
                 type="button"
                 onClick={refreshForecast}
@@ -290,16 +347,6 @@ function HomeShell() {
             actionDisabled={forecastStatus === 'loading'}
             onAction={refreshForecast}
           />
-          {error ? (
-            <p className="rounded-2xl border border-transparent bg-brand-sunrise px-space-md py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm">
-              {error}
-            </p>
-          ) : null}
-          {forecastError ? (
-            <p className="rounded-2xl border border-transparent bg-brand-zenith px-space-md py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm">
-              {forecastError}
-            </p>
-          ) : null}
         </aside>
       </section>
       <section className="grid gap-space-lg lg:grid-cols-[1.6fr_1fr]">

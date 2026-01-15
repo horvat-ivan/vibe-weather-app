@@ -70,7 +70,9 @@ function buildNavigatorGeolocator(): Geolocator | null {
             longitude: position.coords.longitude,
           }),
         (error) => {
-          reject(new Error(error.message));
+          const enhancedError = new Error(error.message);
+          (enhancedError as Error & { code?: number }).code = error.code;
+          reject(enhancedError);
         },
         { enableHighAccuracy: true, timeout: 10000 },
       );

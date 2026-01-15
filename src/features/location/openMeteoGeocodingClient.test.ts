@@ -82,4 +82,14 @@ describe('reverseGeocodeLocation', () => {
     const result = await reverseGeocodeLocation({ latitude: 48.85, longitude: 2.34 }, fetchMock);
     expect(result?.name).toBe('Paris');
   });
+
+  it('respects the forceFallback flag and skips the network call', async () => {
+    const fetchMock = vi.fn();
+    const result = await reverseGeocodeLocation(
+      { latitude: 48.85, longitude: 2.34, forceFallback: true },
+      fetchMock,
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(result?.name).toBe('Paris');
+  });
 });
