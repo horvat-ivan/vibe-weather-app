@@ -12,12 +12,13 @@
 | --- | --- | --- |
 | Weather data | Open-Meteo `/forecast` endpoint | Query parameters: `latitude`, `longitude`, `hourly`, `daily`, `current_weather`, `timezone`. Rate limit ~10k/day per IP. |
 | Geocoding | Open-Meteo Geocoding API | Used for manual search and reverse geocoding fallback when device coordinates unavailable. |
+| Locations API (new) | Internal `/api/locations` proxy | Accepts device coordinates, enriches via preferred provider (BigDataCloud/OpenCage), returns canonical city/locality/timezone metadata consumed by the client. |
 | Icons | Custom Lottie/SVG set | Represents vibes + weather states, packaged locally. |
 
 ## 3. Data Flow
 1. User grants location permission or searches a city.
-2. Location module normalizes into coordinates + timezone and stores in preferences.
-3. Fetch layer calls Open-Meteo hourly/daily endpoints, normalizes metrics (metric/imperial) and writes both network + cache layers.
+2. Location module calls the locations API (when online) to normalize coordinates + canonical locality/timezone metadata, then stores the tuple in preferences.
+3. Fetch layer calls Open-Meteo hourly/daily endpoints with the exact coordinates returned from the previous step, normalizes metrics (metric/imperial) and writes both network + cache layers.
 4. Vibe engine derives a vibe tag (e.g., `out_and_about`, `cozy_day`) plus guidance metadata using rule tables.
 5. UI renders summary hero, vibe card, hourly timeline, and actionable cards, sourcing from React Query caches.
 6. Service worker caches shell assets + last forecast for offline bootstrap; stale data flagged until new fetch completes.
@@ -25,7 +26,8 @@
 ## 4. Module Breakdown
 - **App Shell**: routing, layout system, theme tokens, skeleton states.
 - **Service Worker**: precaches the shell (`/`, HTML, icons) and keeps a stale-while-revalidate cache for Open-Meteo responses so the hero can hydrate from offline data before the network returns.
-- **Location Service**: wraps Geolocation API, Open-Meteo geocoding, and saved locations storage.
+- **Location Service**: wraps Geolocation API, the new locations API proxy, Open-Meteo geocoding fallback, and saved locations storage so UI labels always match the coordinates used for each forecast.
+- **Locations API Client**: lightweight fetcher + cache that calls `/api/locations` with device coordinates, handles retries/timeouts, and ensures we never render stale or mismatched city metadata.
 - **Forecast Client**: typed fetcher with retry/backoff, unit normalization, and React Query integration.
 - **Vibe Engine**: deterministic rule evaluation based on temperature bands, feels-like deltas, precipitation probability, wind speed, daylight, and humidity.
 - **Guidance Generator**: maps vibe outcomes to clothing, activity, and alert suggestions; supports tiered severity (info, heads-up, urgent).
@@ -58,6 +60,7 @@
 ## 7. Risks & Mitigations
 - **API rate limits / downtime**: Cache per-location forecasts and expose degraded mode messaging; allow manual refresh with exponential backoff.
 - **Geolocation denial**: ensure city search UX is first-class and persist last-used location.
+- **Location drift/mismatched labels**: enforce a single location source (locations API + cached tuple) so UI copy and forecast calls share the same coordinates; add monitoring for stale entries.
 - **Rule accuracy**: run user testing with telemetry hooks to adjust vibe thresholds.
 - **Offline storage quota**: trim cached locations (max 5) and reuse shareable card assets.
 

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { focusRing } from '../lib/styleTokens.ts';
 
 type ConnectivityBannerVariant = 'offline' | 'warning';
 
@@ -15,8 +16,7 @@ const VARIANT_STYLES: Record<ConnectivityBannerVariant, VariantStyles> = {
       'bg-brand-twilight/95 border border-white/15 text-white shadow-[0_20px_45px_rgba(0,0,0,0.45)]',
     label: 'text-white/80',
     description: 'text-white/90',
-    button:
-      'border-white/30 text-white hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white/40',
+    button: 'border-white/30 text-white hover:bg-white/15',
   },
   warning: {
     container:
@@ -24,7 +24,7 @@ const VARIANT_STYLES: Record<ConnectivityBannerVariant, VariantStyles> = {
     label: 'text-[color:var(--color-text-inverse)] opacity-70',
     description: 'text-[color:var(--color-text-inverse)] opacity-90',
     button:
-      'border-[color:rgba(5,12,31,0.35)] text-[color:var(--color-text-inverse)] hover:bg-[rgba(5,12,31,0.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[rgba(5,12,31,0.3)]',
+      'border-[color:rgba(5,12,31,0.35)] text-[color:var(--color-text-inverse)] hover:bg-[rgba(5,12,31,0.08)]',
   },
 };
 
@@ -67,7 +67,7 @@ export function ConnectivityBanner({
             type="button"
             onClick={onAction}
             disabled={actionDisabled}
-            className={`inline-flex items-center justify-center rounded-full border px-space-md py-space-3xs text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-65 ${button}`}
+            className={`inline-flex items-center justify-center rounded-full border px-space-md py-space-3xs text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-65 ${button} ${focusRing}`}
           >
             {actionLabel}
           </button>

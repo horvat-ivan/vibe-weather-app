@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { CardSurface } from '../components/CardSurface.tsx';
 import { ConnectivityBanner } from '../components/ConnectivityBanner.tsx';
 import { useLocationService } from '../features/location/locationContext.tsx';
 import type { LocationSnapshot } from '../features/location/types.ts';
+import { focusRing } from '../lib/styleTokens.ts';
 
 export function LocationsRoute() {
   const {
@@ -41,7 +43,7 @@ export function LocationsRoute() {
         />
       ) : null}
       <div className="grid gap-space-lg lg:grid-cols-[2fr_1fr]">
-        <section className="frosted-panel rounded-emphasis border border-surface-outline/60 p-space-lg shadow-card">
+        <CardSurface variant="frosted" className="rounded-emphasis">
           <p className="text-sm uppercase tracking-[0.35em] text-text-muted">Choose your anchor</p>
           <h1 className="mt-space-xs font-display text-display-md text-brand-zenith">
             Saved locations
@@ -61,7 +63,7 @@ export function LocationsRoute() {
               onChange={(event) => handleQueryChange(event.target.value)}
               placeholder="e.g., Brooklyn, Austin, Portland"
               data-testid="location-search-input"
-              className="w-full rounded-2xl border border-surface-outline/80 bg-transparent px-space-md py-space-2xs text-body-lg text-text-primary placeholder:text-text-muted focus:border-brand-zenith focus:outline-none"
+              className={`w-full rounded-2xl border border-surface-outline/80 bg-transparent px-space-md py-space-2xs text-body-lg text-text-primary placeholder:text-text-muted focus:border-brand-zenith focus:outline-none ${focusRing}`}
             />
             {query && (
               <div className="rounded-2xl border border-surface-outline/60 bg-surface-raised">
@@ -73,7 +75,7 @@ export function LocationsRoute() {
                           type="button"
                           onClick={() => handleSelect(location)}
                           data-testid="location-search-result"
-                          className="flex w-full items-start justify-between gap-space-xs border-b border-surface-outline/50 px-space-md py-space-xs text-left hover:bg-surface-base/60 last:border-b-0"
+                          className={`flex w-full items-start justify-between gap-space-xs border-b border-surface-outline/50 px-space-md py-space-xs text-left hover:bg-surface-base/60 last:border-b-0 ${focusRing}`}
                         >
                           <div>
                             <p className="font-semibold text-text-primary">{location.name}</p>
@@ -106,7 +108,7 @@ export function LocationsRoute() {
                 <button
                   key={location.id}
                   type="button"
-                  className={`rounded-full border px-space-sm py-space-2xs text-sm font-medium ${
+                  className={`rounded-full border px-space-sm py-space-2xs text-sm font-medium ${focusRing} ${
                     selectedLocation.id === location.id
                       ? 'border-transparent bg-brand-sunrise text-[var(--color-text-inverse)] shadow-sm'
                       : 'border-surface-outline/70 text-text-secondary hover:bg-surface-raised/80'
@@ -129,7 +131,7 @@ export function LocationsRoute() {
                 {favoriteLocations.map((location) => (
                   <li
                     key={location.id}
-                    className="flex items-center justify-between rounded-2xl border border-surface-outline/60 bg-surface-base/50 px-space-md py-space-2xs"
+                    className="flex items-center justify-between rounded-2xl border border-surface-outline/40 bg-surface-raised/40 px-space-md py-space-2xs"
                   >
                     <div>
                       <p className="font-semibold text-text-primary">{location.name}</p>
@@ -140,7 +142,7 @@ export function LocationsRoute() {
                     <div className="flex items-center gap-space-2xs">
                       <button
                         type="button"
-                        className="rounded-full border border-brand-zenith/60 px-space-sm py-space-3xs text-sm font-semibold text-brand-zenith hover:bg-brand-zenith/10"
+                        className={`rounded-full border border-brand-zenith/60 px-space-sm py-space-3xs text-sm font-semibold text-brand-zenith hover:bg-brand-zenith/10 ${focusRing}`}
                         onClick={() => selectLocation(location)}
                       >
                         Pin
@@ -148,7 +150,7 @@ export function LocationsRoute() {
                       <button
                         type="button"
                         onClick={() => toggleFavorite(location)}
-                        className="rounded-full border border-surface-outline/60 px-space-sm py-space-3xs text-sm text-text-muted transition hover:bg-surface-raised/60"
+                        className={`rounded-full border border-surface-outline/60 px-space-sm py-space-3xs text-sm text-text-muted transition hover:bg-surface-raised/60 ${focusRing}`}
                         aria-label={`Remove ${location.name} from favorites`}
                       >
                         Remove
@@ -163,27 +165,25 @@ export function LocationsRoute() {
               </p>
             )}
           </div>
-        </section>
+        </CardSurface>
 
         <aside className="space-y-space-sm">
-          <article className="rounded-3xl border border-surface-outline/60 bg-surface-raised p-space-lg">
-            <h2 className="font-display text-heading-lg text-text-primary">Use device location</h2>
+          <CardSurface>
+            <h2 className="font-display text-heading-lg text-brand-zenith">Use device location</h2>
             <p className="mt-space-xs text-body-sm text-text-secondary">
               Tap to try browser geolocation and snap to the closest mock city.
             </p>
             <button
               type="button"
               onClick={detectLocation}
-              className="mt-space-sm rounded-full border border-brand-zenith/70 bg-brand-zenith px-space-md py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm transition hover:brightness-110"
+              className={`mt-space-sm rounded-full border border-brand-zenith/70 bg-brand-zenith px-space-md py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm transition hover:brightness-110 ${focusRing}`}
             >
               {status === 'locating' ? 'Locating...' : 'Use current location'}
             </button>
-          </article>
+          </CardSurface>
 
-          <article className="rounded-3xl border border-surface-outline/60 bg-surface-raised p-space-lg">
-            <h2 className="text-sm uppercase tracking-[0.35em] text-text-muted">
-              Currently pinned
-            </h2>
+          <CardSurface>
+            <p className="text-eyebrow uppercase text-text-muted">Currently pinned</p>
             <p
               className="mt-space-xs font-display text-heading-lg text-brand-zenith"
               data-testid="pinned-location-name"
@@ -194,7 +194,7 @@ export function LocationsRoute() {
             <p className="mt-space-xs text-body-sm text-text-muted">
               {selectedLocation.region}, {selectedLocation.country}
             </p>
-          </article>
+          </CardSurface>
         </aside>
       </div>
     </div>

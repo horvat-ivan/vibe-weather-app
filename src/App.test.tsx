@@ -79,6 +79,7 @@ describe('App shell', () => {
 
     await screen.findByRole('heading', { name: /Next hours/i });
     expect(screen.getAllByText(/humidity/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/relative humidity/i)).toBeInTheDocument();
     expect(screen.getByText(/share vibe/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /use current location/i })).toBeInTheDocument();
     expect(await screen.findByText(/Pinned to San Francisco/i)).toBeInTheDocument();

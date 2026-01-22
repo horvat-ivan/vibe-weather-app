@@ -1,12 +1,15 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
+import { CardSurface } from './components/CardSurface.tsx';
 import { ConnectivityBanner } from './components/ConnectivityBanner.tsx';
 import { Logo } from './components/Logo.tsx';
 import { NetworkAwareShell } from './components/NetworkAwareShell.tsx';
 import { LocationProvider, useLocationService } from './features/location/locationContext.tsx';
+import type { QuickMetric } from './features/location/types.ts';
 import { useShareVibe } from './features/vibe/useShareVibe.ts';
 import { deriveVibeProfile } from './features/vibe/vibeEngine.ts';
 import type { OpenMeteoForecastResponse } from './features/weather/openMeteoClient.ts';
 import { useForecastForLocation } from './features/weather/useForecast.ts';
+import { focusRing } from './lib/styleTokens.ts';
 import { FavoritesRoute } from './routes/FavoritesRoute.tsx';
 import { LocationsRoute } from './routes/LocationsRoute.tsx';
 
@@ -20,7 +23,7 @@ function Header() {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              `rounded-full px-space-sm py-space-2xs text-sm font-medium transition-colors duration-200 ${
+              `rounded-full px-space-sm py-space-2xs text-sm font-medium transition-colors duration-200 ${focusRing} ${
                 isActive
                   ? 'bg-brand-sunrise text-[var(--color-text-inverse)]'
                   : 'text-text-secondary hover:bg-surface-raised/70'
@@ -32,7 +35,7 @@ function Header() {
           <NavLink
             to="/favorites"
             className={({ isActive }) =>
-              `rounded-full px-space-sm py-space-2xs text-sm font-medium transition-colors duration-200 ${
+              `rounded-full px-space-sm py-space-2xs text-sm font-medium transition-colors duration-200 ${focusRing} ${
                 isActive
                   ? 'bg-brand-sunrise text-[var(--color-text-inverse)]'
                   : 'text-text-secondary hover:bg-surface-raised/70'
@@ -46,7 +49,7 @@ function Header() {
             to="/locations"
             data-testid="header-location-switcher"
             className={({ isActive }) =>
-              `flex items-center gap-space-3xs rounded-full px-space-sm py-space-2xs text-sm font-semibold transition-colors duration-200 ${
+              `flex items-center gap-space-3xs rounded-full px-space-sm py-space-2xs text-sm font-semibold transition-colors duration-200 ${focusRing} ${
                 isActive
                   ? 'bg-brand-zenith/90 text-[var(--color-text-inverse)]'
                   : 'text-brand-zenith border border-brand-zenith/50 hover:bg-brand-zenith/10'
@@ -63,7 +66,7 @@ function Header() {
             type="button"
             onClick={shareVibe}
             disabled={isSharing}
-            className="rounded-full border border-brand-zenith/70 bg-brand-zenith px-space-sm py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+            className={`rounded-full border border-brand-zenith/70 bg-brand-zenith px-space-sm py-space-2xs text-sm font-semibold text-[var(--color-text-inverse)] shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70 ${focusRing}`}
           >
             {isSharing ? 'Sharing...' : 'Share vibe'}
           </button>
@@ -136,7 +139,7 @@ function HomeShell() {
   const heroTemperature = currentConditions?.temperature ?? fallbackTemperature;
   const heroFeelsLike = currentConditions?.feelsLike ?? fallbackFeelsLike;
   const heroDescription = currentConditions?.description ?? selectedLocation.condition;
-  const heroMetrics = currentConditions
+  const heroMetrics: QuickMetric[] = currentConditions
     ? [
         {
           label: 'Humidity',
@@ -156,7 +159,7 @@ function HomeShell() {
       ]
     : selectedLocation.metrics;
 
-  const hourlyPoints = buildHourlyPoints(forecast, selectedLocation.timezone).slice(0, 8);
+  const hourlyPoints = buildHourlyPoints(forecast, selectedLocation.timezone);
   const dailyPoints = buildDailyPoints(forecast, selectedLocation.timezone).slice(0, 5);
   const heroTempF = measurementToFahrenheit(heroTemperature);
   const heroFeelsLikeF = measurementToFahrenheit(heroFeelsLike);
@@ -281,11 +284,12 @@ function HomeShell() {
           </div>
           <div className="mt-space-lg flex flex-wrap gap-space-xl text-sm text-white/90">
             {heroMetrics.map((metric) => (
-              <div key={metric.label} className="flex flex-col">
+              <div key={metric.label} className="flex min-w-[140px] flex-col gap-space-3xs">
                 <span className="text-[13px] uppercase tracking-[0.3em] text-white/70">
                   {metric.label}
                 </span>
                 <span className="text-xl font-semibold">{metric.value}</span>
+                <span className="text-sm text-white/70">{metric.detail}</span>
               </div>
             ))}
           </div>
@@ -297,7 +301,7 @@ function HomeShell() {
                 onClick={detectLocation}
                 disabled={isLocating}
                 data-testid="hero-detect-location"
-                className="rounded-full border border-white/30 px-space-md py-space-2xs text-white/90 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                className={`rounded-full border border-white/30 px-space-md py-space-2xs text-white/90 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60 ${focusRing}`}
               >
                 {isLocating ? 'Locating...' : 'Use current location'}
               </button>
@@ -305,7 +309,7 @@ function HomeShell() {
                 type="button"
                 onClick={refreshForecast}
                 disabled={forecastStatus === 'loading'}
-                className="rounded-full border border-white/30 px-space-md py-space-2xs text-white/90 transition hover:bg-white/10 disabled:opacity-60"
+                className={`rounded-full border border-white/30 px-space-md py-space-2xs text-white/90 transition hover:bg-white/10 disabled:opacity-60 ${focusRing}`}
               >
                 {forecastStatus === 'loading' ? 'Refreshing…' : 'Refresh'}
               </button>
@@ -313,7 +317,7 @@ function HomeShell() {
                 type="button"
                 onClick={() => toggleFavorite(selectedLocation)}
                 aria-pressed={isFavorite}
-                className={`rounded-full px-space-md py-space-2xs font-semibold transition ${
+                className={`rounded-full px-space-md py-space-2xs font-semibold transition ${focusRing} ${
                   isFavorite
                     ? 'bg-white text-surface-base'
                     : 'border border-white/30 text-white hover:bg-white/10'
@@ -350,34 +354,34 @@ function HomeShell() {
         </aside>
       </section>
       <section className="grid gap-space-lg lg:grid-cols-[1.6fr_1fr]">
-        <HourlyForecast
+        <HourlyDeck
           points={hourlyPoints}
           isLoading={forecastStatus === 'loading' && !hourlyPoints.length}
         />
-        <DailyForecast
+        <DailyDeck
           days={dailyPoints}
           isLoading={forecastStatus === 'loading' && !dailyPoints.length}
         />
       </section>
       <section className="grid gap-space-sm md:grid-cols-3">
         {planningTiles.map((tile) => (
-          <article
-            key={tile.title}
-            className="rounded-3xl border border-surface-outline/60 bg-surface-raised px-space-md py-space-lg"
-          >
+          <CardSurface key={tile.title} className="px-space-md py-space-lg">
             <div className="flex items-center gap-space-2xs">
               {tile.icon ? (
                 <span className="text-2xl" aria-hidden>
                   {tile.icon}
                 </span>
               ) : null}
-              <h3 className="font-display text-xl text-text-primary">{tile.title}</h3>
+              <h3 className="font-display text-heading-md text-text-primary">{tile.title}</h3>
             </div>
             <p className="mt-space-xs text-body-sm text-text-secondary">{tile.body}</p>
-            <button type="button" className="mt-space-md text-sm font-semibold text-brand-sunrise">
+            <button
+              type="button"
+              className={`mt-space-md text-sm font-semibold text-brand-sunrise underline-offset-4 hover:underline ${focusRing}`}
+            >
               {tile.action}
             </button>
-          </article>
+          </CardSurface>
         ))}
       </section>
     </div>
@@ -418,8 +422,8 @@ type VibeSummaryCardProps = {
 
 function VibeSummaryCard({ heading, title, tagline, summary, icon, tags }: VibeSummaryCardProps) {
   return (
-    <article className="rounded-3xl border border-surface-outline/60 bg-surface-raised p-space-lg text-text-primary shadow-card">
-      <p className="text-xs font-semibold uppercase tracking-[0.4em] text-text-muted">{heading}</p>
+    <CardSurface>
+      <p className="text-eyebrow font-semibold uppercase text-text-muted">{heading}</p>
       <div className="mt-space-2xs flex items-center gap-space-sm">
         {icon ? (
           <span className="text-4xl" aria-hidden>
@@ -444,7 +448,7 @@ function VibeSummaryCard({ heading, title, tagline, summary, icon, tags }: VibeS
           ))}
         </div>
       ) : null}
-    </article>
+    </CardSurface>
   );
 }
 
@@ -489,22 +493,20 @@ function ForecastLoadingScreen({ gradient, locationName, region }: ForecastLoadi
 
 function InfoCard({ title, body, accent, actionLabel, onAction, actionDisabled }: InfoCardProps) {
   return (
-    <article
-      className={`rounded-3xl border border-surface-outline/60 p-space-lg text-text-primary ${accent ?? 'bg-surface-raised'}`}
-    >
-      <h3 className="font-display text-heading-lg">{title}</h3>
+    <CardSurface className={accent ?? ''}>
+      <h3 className="font-display text-heading-lg text-brand-zenith">{title}</h3>
       <p className="mt-space-xs text-body-sm text-text-secondary">{body}</p>
       {actionLabel ? (
         <button
           type="button"
           disabled={actionDisabled}
           onClick={onAction}
-          className="mt-space-sm text-sm font-semibold text-brand-zenith underline-offset-4 hover:underline disabled:text-text-muted"
+          className={`mt-space-sm text-sm font-semibold text-brand-zenith underline-offset-4 hover:underline disabled:text-text-muted ${focusRing}`}
         >
           {actionLabel}
         </button>
       ) : null}
-    </article>
+    </CardSurface>
   );
 }
 
@@ -586,77 +588,85 @@ type DailyPoint = {
   trendLabel: string | null;
 };
 
-function HourlyForecast({ points, isLoading }: { points: HourlyPoint[]; isLoading: boolean }) {
+function HourlyDeck({ points, isLoading }: { points: HourlyPoint[]; isLoading: boolean }) {
   return (
-    <article className="frosted-panel rounded-emphasis border border-surface-outline/70 p-space-lg shadow-card">
-      <div className="flex items-center justify-between">
+    <CardSurface variant="frosted" className="space-y-space-sm overflow-hidden">
+      <header className="flex flex-wrap items-center justify-between gap-space-sm">
         <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-text-muted">hourly outlook</p>
+          <p className="text-eyebrow uppercase text-text-muted">Hourly outlook</p>
           <h2 className="font-display text-heading-lg text-brand-zenith">Next hours</h2>
         </div>
-        <span className="text-xs text-text-muted">
-          {points.length ? `Next ${points.length} hrs` : ''}
-        </span>
-      </div>
+        {points.length ? (
+          <span className="text-body-xs text-text-muted">Next {points.length} hrs</span>
+        ) : null}
+      </header>
       {isLoading ? <ForecastSkeleton variant="strip" /> : null}
       {!isLoading && points.length > 0 ? (
-        <div className="mt-space-md flex gap-space-sm overflow-x-auto pb-space-xs">
-          {points.map((point) => (
-            <div
-              key={point.timestamp}
-              className={`min-w-[140px] rounded-2xl border px-space-sm py-space-sm transition ${
-                point.isCurrentHour
-                  ? 'border-brand-zenith bg-brand-zenith/10 text-brand-zenith'
-                  : 'border-surface-outline/60 bg-surface-raised text-text-primary'
-              }`}
-            >
-              <p className="text-sm font-semibold">{point.label}</p>
-              <div className="flex items-center gap-space-2xs">
-                <p className="text-heading-lg font-semibold">
-                  {formatMeasurement(point.temperature)}
+        <div className="overflow-x-auto scrollbar-hide" data-testid="hourly-scroll">
+          <div className="flex flex-nowrap gap-space-sm pb-space-xs">
+            {points.map((point) => (
+              <article
+                key={point.timestamp}
+                className={`flex min-w-[170px] flex-shrink-0 flex-col rounded-3xl border px-space-sm py-space-sm shadow-card transition ${
+                  point.isCurrentHour
+                    ? 'border-brand-zenith bg-brand-zenith/15 text-brand-zenith'
+                    : 'border-surface-outline/40 bg-surface-raised text-text-primary'
+                }`}
+              >
+                <p className="text-body-xs font-semibold uppercase tracking-[0.35em] text-text-muted">
+                  {point.label}
                 </p>
-                <span className="text-xl" aria-hidden>
-                  {getWeatherGlyph(point.weatherCode)}
-                </span>
-              </div>
-              <p className="text-body-xs text-text-secondary">
-                {point.feelsLike.value != null
-                  ? `Feels ${formatMeasurement(point.feelsLike)}`
-                  : 'Feels —'}
-              </p>
-              <p className="text-body-xs text-text-muted">
-                {point.precipProbability.value != null
-                  ? `${formatMeasurement(point.precipProbability)} rain`
-                  : 'Rain —'}
-              </p>
-            </div>
-          ))}
+                <div className="mt-space-2xs flex items-baseline gap-space-2xs">
+                  <p className="text-display-md font-semibold leading-none">
+                    {formatMeasurement(point.temperature)}
+                  </p>
+                  <span className="text-xl" aria-hidden>
+                    {getWeatherGlyph(point.weatherCode)}
+                  </span>
+                </div>
+                <p className="text-body-xs text-text-secondary">
+                  {point.feelsLike.value != null
+                    ? `Feels ${formatMeasurement(point.feelsLike)}`
+                    : 'Feels —'}
+                </p>
+                <p className="text-body-xs text-text-muted">
+                  {point.precipProbability.value != null
+                    ? `${formatMeasurement(point.precipProbability)} rain`
+                    : 'Rain —'}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
       ) : null}
       {!isLoading && !points.length ? (
-        <p className="mt-space-md text-body-sm text-text-muted">
+        <p className="text-body-sm text-text-muted">
           Hourly data will appear after the first successful sync.
         </p>
       ) : null}
-    </article>
+    </CardSurface>
   );
 }
 
-function DailyForecast({ days, isLoading }: { days: DailyPoint[]; isLoading: boolean }) {
+function DailyDeck({ days, isLoading }: { days: DailyPoint[]; isLoading: boolean }) {
   return (
-    <article className="rounded-3xl border border-surface-outline/70 bg-surface-raised p-space-lg shadow-card">
-      <p className="text-sm uppercase tracking-[0.35em] text-text-muted">daily trend</p>
-      <h2 className="font-display text-heading-lg text-brand-zenith">Upcoming days</h2>
+    <CardSurface className="space-y-space-sm">
+      <div>
+        <p className="text-eyebrow uppercase text-text-muted">Daily trend</p>
+        <h2 className="font-display text-heading-lg text-brand-zenith">Upcoming days</h2>
+      </div>
       {isLoading ? <ForecastSkeleton variant="stack" /> : null}
       {!isLoading && days.length > 0 ? (
-        <div className="mt-space-md space-y-space-sm">
+        <div className="space-y-space-sm">
           {days.map((day) => (
-            <div
+            <article
               key={day.date}
-              className="flex items-center justify-between rounded-2xl border border-surface-outline/50 px-space-sm py-space-2xs"
+              className="flex flex-col gap-space-2xs rounded-2xl border border-surface-outline/40 bg-surface-raised/60 px-space-sm py-space-sm shadow-card sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p className="text-sm font-semibold text-text-primary">{day.label}</p>
+                <p className="text-body-sm font-semibold uppercase tracking-wide text-text-muted">
+                  {day.label}
+                </p>
                 <p className="text-body-xs text-text-secondary">
                   {day.sunriseLabel && day.sunsetLabel
                     ? `${day.sunriseLabel} / ${day.sunsetLabel}`
@@ -677,16 +687,16 @@ function DailyForecast({ days, isLoading }: { days: DailyPoint[]; isLoading: boo
                     : 'Rain —'}
                 </p>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       ) : null}
       {!isLoading && !days.length ? (
-        <p className="mt-space-md text-body-sm text-text-muted">
+        <p className="text-body-sm text-text-muted">
           Daily summaries will show up once Open-Meteo returns data for this location.
         </p>
       ) : null}
-    </article>
+    </CardSurface>
   );
 }
 
@@ -860,11 +870,34 @@ function buildHourlyPoints(
   const hourlyUnits = (forecast.hourly_units ?? {}) as Record<string, string>;
   const currentUnits = forecast.current_weather_units ?? {};
 
-  const limit = Math.min(times.length, 12);
+  const parseTimestamp = (value: string | undefined): number | null => {
+    if (!value) {
+      return null;
+    }
+    const parsed = Date.parse(value);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+    const fallbackParsed = Date.parse(`${value}Z`);
+    return Number.isNaN(fallbackParsed) ? null : fallbackParsed;
+  };
+
   const currentTimestamp = forecast.current_weather?.time ?? null;
+  const currentMs = parseTimestamp(currentTimestamp);
+  let pivotIndex = -1;
+  if (currentMs !== null) {
+    pivotIndex = times.findIndex((ts) => {
+      const tsMs = parseTimestamp(ts);
+      return tsMs !== null && tsMs >= currentMs;
+    });
+  }
+
+  const startIndex = pivotIndex >= 0 ? pivotIndex : 0;
+  const limit = Math.min(times.length, startIndex + 12);
+  const highlightTimestamp = pivotIndex >= 0 ? times[pivotIndex] : null;
 
   const points: HourlyPoint[] = [];
-  for (let index = 0; index < limit; index += 1) {
+  for (let index = startIndex; index < limit; index += 1) {
     const timestamp = times[index];
     points.push({
       timestamp,
@@ -889,7 +922,9 @@ function buildHourlyPoints(
         hourlyUnits.windspeed_10m ?? currentUnits.windspeed ?? 'km/h',
       ),
       humidity: createMeasurement(humidity[index], hourlyUnits.relative_humidity_2m ?? '%'),
-      isCurrentHour: Boolean(currentTimestamp ? currentTimestamp === timestamp : index === 0),
+      isCurrentHour: Boolean(
+        highlightTimestamp ? highlightTimestamp === timestamp : index === startIndex,
+      ),
       weatherCode: typeof codes[index] === 'number' ? (codes[index] ?? null) : null,
     });
   }

@@ -19,7 +19,10 @@
 - [x] Persist last selected location in local storage/IndexedDB.
 - [x] Add basic analytics/logging hooks for fetch success/failure.
 - [x] Integrate a reverse-geocoding API (or hosted mock) so device coordinates resolve to real city names instead of the current hardcoded list.
+- [ ] Guarantee location fidelity end-to-end: ensure the forecast fetcher, hero labels, recents list, and vibe summaries all reuse the exact latitude/longitude returned from the most recent geolocation/locations API response, and add regression/unit tests that fail if the values drift.
 - [ ] Evaluate/replace the temporary geocoding fallback list with a managed provider (BigDataCloud, OpenCage, Mapbox) and update ADR + clients accordingly.
+- [ ] Design and implement a `/api/locations` proxy that accepts raw device coordinates, calls the chosen provider server-side, and returns canonical locality/timezone metadata so the client never exposes API keys; document response contracts and add caching semantics.
+- [ ] Thread the new locations API through the LocationProvider, React Query cache, and manual search results so every forecast request is issued with the canonical tuple while still supporting offline fallbacks.
 - [ ] Expand location search beyond the current mock list by integrating a comprehensive city catalog or external geocoding API so queries like "Varaždin" resolve correctly, and overhaul the search UI for instant, debounced results.
 - [ ] Auto-trigger geolocation detection on app bootstrap so we prompt for browser permission immediately and only fall back to stored/default snapshots when access is denied or unavailable. Document the flow in the tech plan.
 - [ ] Add a first-time location permission prompt (modal or banner) that explains the benefit of sharing location, captures “Not now/Allow”, and suppresses repeated prompts once a preference is stored.
@@ -52,6 +55,12 @@
 - [x] Detect offline mode, surface an "offline" indicator, and serve the last cached forecast instead of fake data.
 - [ ] Refresh the full UI so hero, cards, and navigation share one art direction and stay responsive across desktop + mobile. *Note: scope a design exploration first to define the unified look before coding.*
 - [ ] Audit the entire app for components still using deprecated styles and update them to the latest UI guidelines (palette, typography, chip/button patterns) so visual consistency is maintained everywhere.
+- [ ] Align the Locations route cards (search shell, device CTA, pinned summary) with the new `CardSurface` pattern so settings panels mirror the refreshed hero/supporting cards.
+- [ ] Investigate the UI components that currently overflow the page width, document the root cause (layout constraints, flex gap, etc.), and propose fixes to restore responsive behavior.
+- [x] Add a Biome `lint:fix` script and document the "run before finishing" rule in `AGENTS.md` so every agent run keeps lint clean.
+- [x] Add consistent `focus-visible` outlines to header navigation, hero controls, planning tiles, and location chips so keyboard navigation matches the refreshed UI polish.
+- [x] Upgrade the hourly timeline to use scroll snapping with subtle edge fades so horizontal scrolling feels intentional on touch devices.
+- [ ] Match the “Daily trend” card styling to the refreshed Hourly Outlook deck so both sections share the same card shell, typography, and interaction patterns.
 
 ## Phase 4: Offline & Resilience
 - [x] Integrate service worker for asset + data caching.

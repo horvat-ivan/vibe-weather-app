@@ -29,3 +29,8 @@ Never commit secrets—load API keys through `.env.local` consumed by Vite. Mark
 - [`docs/tasks.md`](docs/tasks.md) — active work board and ownership notes.
 - [`docs/specification.md`](docs/specification.md) — product brief and UX intents.
 - [`docs/adr`](docs/adr) — architecture decisions and rationale snapshots.
+
+## Agent Workflow Checklist
+- **Create or update a task.** Every coding effort must tie back to an item in `docs/tasks.md` (or a linked ticket). Add a brief note before touching code so reviewers see the intent trail.
+- **Run the lint fixer.** Execute `pnpm lint:fix` before declaring a task complete so Biome autofixes are applied and lint stays clean.
+- **Run checks before hand-off.** At minimum run `pnpm test` for unit coverage; include `pnpm lint`/`pnpm build` when the change warrants it. Document the commands + outcomes in your summary.

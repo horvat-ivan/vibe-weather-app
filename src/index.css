@@ -70,4 +70,13 @@
     backdrop-filter: blur(18px);
     background: var(--color-surface-overlay);
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

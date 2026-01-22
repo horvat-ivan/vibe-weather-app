@@ -24,3 +24,8 @@
 - Decide whether we need forward geocoding (search) + reverse geocoding from the same provider; if yes, pick one API that does both to avoid data drift.
 - Wrap the chosen provider in a single client module with retries and caching so the LocationProvider doesn’t need the fallback list.
 - Update ADR/technical plan once the provider is selected and wired up.
+
+## Dedicated Locations API Direction
+- Stand up a lightweight `/api/locations` endpoint that receives raw device coordinates and calls the chosen provider server-side so API keys stay private.
+- Normalize the response into `{ latitude, longitude, locality, region, country, timezone }` so the client can hand the tuple directly to the forecast fetcher and UI.
+- Cache successful lookups per coordinate hash for at least 24 hours to reduce quota usage and ensure repeat sessions reuse consistent location labels.
